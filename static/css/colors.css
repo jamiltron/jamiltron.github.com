@@ -4,22 +4,20 @@ html {
 
 body {
         color: #000000;
-	background-color:  #FFFFFF;
-	border-color:  #FFFFFF;
+	border: 0;
 }
 
 #menu {
-	background-color: #FFFFFF;
-	border-color: #FFFFFF;
+
+	border: 0;
 }
 
 a, a:visited {
-	color: #0033DD;
+	color: #3333FF;
 }
 
 hr {
     border: 0;
-    color: #000000;
-    background-color: #000000;
+    color: #bc9566;
     height: 3px;
 }
