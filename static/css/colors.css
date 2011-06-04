@@ -1,0 +1,25 @@
+html {
+	background-color: #FFFFFF;
+}
+
+body {
+        color: #000000;
+	background-color:  #FFFFFF;
+	border-color:  #FFFFFF;
+}
+
+#menu {
+	background-color: #FFFFFF;
+	border-color: #FFFFFF;
+}
+
+a, a:visited {
+	color: #0033DD;
+}
+
+hr {
+    border: 0;
+    color: #000000;
+    background-color: #000000;
+    height: 3px;
+}
