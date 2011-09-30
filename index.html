@@ -1,40 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-	<head>
-	  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-	  <title>Justin Hamilton's Webpage</title>
-	  <style type="text/css" media="screen">
-		@import 'static/css/main.css';
-		@import 'static/css/colors.css';
-	  </style>
-      <link rel="stylesheet" type="text/css" media="print" href="static/css/print.css" />
-      <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
-	<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
-	</head>
+---
+layout: default
+title: Justin Hamilton
+---
 
-	<body>
-      <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
-      </script>
-
-	  <h1 id="title"><a name="top"></a>Justin Hamilton</h1>
-          <a href="http://jamiltron.github.com">Home</a> - 
-          <a href="resume.html">Resume</a> - 
-          <a href="http://jamiltronblog.blogspot.com/">Blog</a> - 
-          <a href="https://github.com/jamiltron">Github Profile</a>
-          <br/>
-
-					
-	  <div id="content"><br/>
-	    <h2>Welcome</h2>
-            <p>Hello, my name is Justin Hamilton. I am currently a graduate student at the <a href="http://www.cs.unomaha.edu/">University of Nebraska at Omaha.</a> 
-	      I hold of B.S. in Computer Science and Mathematics from there. I am also a full-time programmer for the United States Air Force Weather Agency.</p>
-	    <p>My current projects include a <a href="https://github.com/jamiltron/forsight">Forth interpreter written in Scheme</a> and 
-	      <a href="https://github.com/jamiltron/4clojure-solutions">working through</a> the problems listed at <a href="http://4clojure.com">4clojure</a>. I also want
-	      to become better at functional programming (and Clojure in general) as well as try my hand at a web app or two.</p>
-	    <p>I live with my wonderful girlfriend in Omaha, NE, and in my free time I enjoy practicing Brazilian Jiu Jitsu, reading, and playing games.</p>
-
-	  </div>
-    </body>
-</html>
-
-
+<div id="content">
+  <h1>Posts</h1>
+  <ul class="posts">
+    {% for post in site.posts %}
+      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
