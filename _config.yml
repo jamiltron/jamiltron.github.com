@@ -1,0 +1,8 @@
+destination: ./_site
+auto: true
+lsi: false
+server_port: 4000
+pygments: true
+markdown: maruku
+permalink: /:year/:month/:title.html
+
