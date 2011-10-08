@@ -3,7 +3,7 @@ layout: post
 title: Moving My Blog to Github
 ---
 
-# {page.title}
+<h2 class="post_title">Moving My Blog to Github</h2>
 
 Hello there, I thought I would try out moving my blog to github, and test out
 this whole Jekyll thing. I would like to make my blog posts a little more

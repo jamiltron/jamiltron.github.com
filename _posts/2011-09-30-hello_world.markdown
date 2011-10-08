@@ -3,6 +3,6 @@ layout: post
 title: Hello, World!
 ---
 
-# {{page.title}}
+<h2 class="post_title">Hello, World!</h2>
 
 Hello there!
