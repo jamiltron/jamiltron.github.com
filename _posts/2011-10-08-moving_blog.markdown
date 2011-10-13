@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Moving My Blog to Github
+description: An update on what's going on and why this is here.
 ---
 
 <h2 class="post_title">Moving My Blog to Github</h2>
