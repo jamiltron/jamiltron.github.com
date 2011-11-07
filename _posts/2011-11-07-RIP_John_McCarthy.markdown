@@ -1,7 +1,7 @@
 ---
 layout: post
-title: RIP Dennis Ritchie
-description: Thank you for everything, you will be missed.
+title: RIP John McCarthy
+description: Another great loss.
 ---
 
 <h2 class="post_title">RIP John McCarthy</h2>
