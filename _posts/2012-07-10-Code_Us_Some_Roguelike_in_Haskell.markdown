@@ -138,7 +138,7 @@ This mostly does what we want - but what if we start pressing
 the hero is moving in the opposite direction from where
 we want. To keep this from happening we need to limit the
 hero's movement. In fact, let's keep the hero in between 0 and
-80 on both directions. We should also remove the case section out of
+80 in all directions. We should also remove the case section out of
 `handleDir`, that way we can apply directions to anything, not just the
 player.
 
