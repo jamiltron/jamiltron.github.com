@@ -60,3 +60,5 @@
 .haskell .vg { color: #19177C } /* Name.Variable.Global */
 .haskell .vi { color: #19177C } /* Name.Variable.Instance */
 .haskell .il { color: #666666 } /* Literal.Number.Integer.Long */
+
+.span .haskell { width: 300px; }
