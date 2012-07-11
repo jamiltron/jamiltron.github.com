@@ -161,7 +161,7 @@ dirToCoord d
 -- position between 0 and 80 in either direction
 handleDir w@(World hero) input = gameLoop (w { wHero = newCoord })
   where newCoord       = (newX, newY)
-        (heroX, heroY) = hero |+| (dirToCoord input)
+        (heroX, heroY) = hero |+| dirToCoord input
         hConst i       = max 0 (min i 80)
         newX           = hConst heroX
         newY           = hConst heroY
