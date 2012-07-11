@@ -189,7 +189,7 @@ handleExit = do
   showCursor
   putStrLn "Thank you for playing!"
 
-{% endhighlighting %}
+{% endhighlight %}
 
 Great, the hero moves around and now we exit a little better than better and we
 have a goodbye message for the player. This is a small start to our roguelike, but its
