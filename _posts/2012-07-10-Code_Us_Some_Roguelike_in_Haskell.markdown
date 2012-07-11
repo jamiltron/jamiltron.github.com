@@ -189,7 +189,7 @@ handleExit = do
   showCursor
   putStrLn "Thank you for playing!"
 
-{% end highlighting %}
+{% endhighlighting %}
 
 Great, the hero moves around and now we exit a little better than better and we
 have a goodbye message for the player. This is a small start to our roguelike, but its
@@ -197,3 +197,5 @@ a good foundation. Next post we'll work with adding some actual game elements to
 
 The code and an install-able project for this post is located at:
 [https://github.com/jamiltron/Thieflike/tree/post01](https://github.com/jamiltron/Thieflike/tree/post01)
+
+Thank you for reading!
