@@ -1,0 +1,20 @@
+---
+layout: post
+title: Test
+description: Test
+---
+
+<h2 class="post_title">Test</h2>
+
+```haskell
+f :: Int -> Int -> Int
+f x y = x + y
+
+calcSomething :: IO Int
+calcSomething = return 3
+
+main :: IO ()
+main = do
+  x <- calcSomething
+  f 2 x
+```
