@@ -18,7 +18,7 @@ but I want to implement my own. We'll call this little game 'Thieflike.'
 I am assuming basic knowledge of Haskell - I'd say through the Monads chapters 
 in either [LYAH](http://learnyouahaskell.com/) or 
 [RWH](http://book.realworldhaskell.org/). I may also suggest reading the Monad 
-Transformers chapter in RWH, although I may just skip on using a transformer - 
+Transformers chapter in RWH, although we might skip on using a transformer - 
 more about that later.
 
 You need `ansi-terminal` for this project, which you should be able to grab
