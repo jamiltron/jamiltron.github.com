@@ -6,14 +6,14 @@ description: A fun game project in Haskell.
 
 <h2 class="post_title">Code Us Some Roguelike in Haskell!</h2>
 
-I've been recently inspired by the great live coding of 
+I've recently been inspired by the great live coding of 
 [Sokoban](http://www.youtube.com/watch?v=mtvoOIsN-GU&feature=youtu.be) to put
 together a console and gui-based [roguelike](http://en.wikipedia.org/wiki/Roguelike)
 in Haskell. There are already some really awesome roguelikes like 
 [LambdaHack](https://github.com/kosmikus/LambdaHack), 
 [Mazes of Monad](http://hackage.haskell.org/package/MazesOfMonad), 
 and [Roguestar](http://roguestar.downstairspeople.org/) (I am sorry if I have forgotten any), 
-but I want to implement my own.
+but I want to implement my own. We'll call this little game 'Thieflike.'
 
 I am assuming basic knowledge of Haskell - I'd say through the Monads chapters 
 in either [LYAH](http://learnyouahaskell.com/) or 
@@ -27,7 +27,7 @@ with `cabal install ansi-terminal`.
 To start this project let's just get a player character on the screen
 and get it to move around. We'll need something to represent the game's
 world as well as the hero. For the hero all we need is a tuple of `Int`s to
-represent the hero's position, and the world will be a datatype containing
+represent the position, and the world will be a datatype containing
 the hero. Let's start a new file named `Main.hs`, which we'll use to contain
 all of our code for this portion of the project.
 
