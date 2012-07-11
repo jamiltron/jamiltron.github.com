@@ -121,8 +121,8 @@ getInput = do
     'd' -> return Right
     _ -> getInput
 
--- given a world an a direction, 'adjust' the hero's position, and loop
--- with out updated hero
+-- given a world and a direction, 'adjust' the hero's position, and loop
+-- with our updated hero
 handleDir w@(World (heroX, heroY)) input = gameLoop $ w { wHero = newCoord }
   where newCoord = case input of
                     Up    -> (heroX, heroY - 1)
