@@ -303,7 +303,8 @@ need to translate characters into our maps.
 {% highlight haskell %}
 -- file: Level.hs
 
-strToLevel str = foldl populate emptyLevel {lMax=maxXY} asciiMap
+strsToLevel :: [String] -> Level
+strsToLevel str = foldl populate emptyLevel {lMax=maxXY} asciiMap
   where
     asciiMap = concat $ zipWith zip coords str
     coords   = [[(x, y) | x <- [0..]] | y <- [0..]]
@@ -346,7 +347,7 @@ one problem left over - they are all one list too deep. Fortunately `concat` sol
 If this doesn't make much sense at first I'd suggest playing around with functions like `zip` and
 `zipWith`. They are immensely useful, along with functions like the `fold`s and `scan`s for
 manipulating sequences functionally and elegantly where one may have thought required some
-sort of an iterative loop. In this case its easy to keep `coords` contained in `strToLevel`
+sort of an iterative loop. In this case its easy to keep `coords` contained in `strsToLevel`
 because that's the only place its going to be used, but when crafting your own sequencing
 functions if you find them difficult you may want to break them out into their own top-level
 functions so you can check the types easier with either GHC or GHCi.
@@ -436,7 +437,7 @@ map1   = [ "##############"
          , "##############          ######" ]
             
 
-level1 = strToLevel map1
+level1 = strsToLevel map1
 
 {% endhighlight %}
 
@@ -578,7 +579,7 @@ hero as it is currently. This will keep our draws down.
 `drawWorld` is only intended to be drawn every so often. It sets the cursor
 to the top-left of the screen, and then it draws all the characters from left to
 right, top to bottom. We use the same infinite list of list of coords that we did
-in `strToLevel`, and we `unlines` it to intersperse newlines inbetween each row
+in `strsToLevel`, and we `unlines` it to intersperse newlines inbetween each row
 so that we don't get one long line of every character on the map.
 
 That does it for `Console.hs`, let's get `Main.hs` done and get to playing. Or rather,
