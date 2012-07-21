@@ -34,9 +34,8 @@ genre:
 Even with such a small set of features the game could
 get pretty hairy. Especially since we intend to eventually
 add support for a graphical front-end beyond the console.
-
 How can we keep each of those things in the game, while
-still keeping it relatively simple?
+still keeping it simple?
 
 
 #### Random Dungeons ####
@@ -45,8 +44,8 @@ While there are all sorts of awesome ways to randomize
 each level, we will be sticking to something like the
 traditional method used in Rogue. This may not produce
 the snazziest environments around, but it will serve the
-purpose, and prevent our levels from becoming superfluous
-given the small set of elements that we are playing with.
+purpose and prevent our levels from becoming superfluous
+given the number of elements we are playing with.
 
 We'll also be implementing a system for random/wandering
 monsters and treasure layout similar to the old D&D Red Box,
@@ -59,7 +58,7 @@ I'll be copping out with a pre-created string.
 
 #### Monsters ####
 
-This may be blasphemous, but we'll only have one enemy
+This may be blasphemous - but we'll only have one enemy
 type, and its strength will be based entirely around
 how deep within the dungeon it is. We can always add more
 later, but this will keep complexity down initially.
@@ -102,16 +101,16 @@ the villain is currently, and where they were last turn.
 We'll be using this to make sure we only draw positions
 on screen that have actually changed. The other attributes are 
 obvious monster stuff - how many hit points a creature has left, 
-what gold its carrying, and what items it possesses. Which leads us to our next point.
+what gold its carrying, and what items it possesses...which leads us to our next point.
 
 
 #### Gear ####
 
 The only gear that is essential for me is weapons,
 potions, and armor. Since we aren't including a leveling
-or skill system, the gear that the hero finds will kind of
-be progress, assuming with better gear the deeper our
-brave protagonist delves.
+or skill system, the gear a hero finds will kind of
+be progress, assuming the deeper the dungeon level is the 
+better its gear is.
 
 {% highlight haskell %}
 -- file: Types.hs
@@ -238,7 +237,7 @@ necessarily the best way to represent a world, but it
 certainly works. `lDepth` says how deep in the dungeon
 this particular level is, and `lMax` is the largest (x,y)
 coordinate for the level. Every other attribute is a
-mapping from coords to a representative data type.
+mapping from coords to a representative type.
 
 To get the game up and running we need to come up with some defaults
 data structures. I'll be cheating a little on the default level and the
