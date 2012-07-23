@@ -208,7 +208,7 @@ data Hero = Hero { hCurrPos :: Coord
                  , hHP      :: Int    
                  , hItems   :: [Item] 
                  , hOldPos  :: Coord  
-                 , hWeild   :: Weapon 
+                 , hWield   :: Weapon 
                  , hWears   :: Armor  }
 
 
@@ -693,7 +693,7 @@ handleDir w dir
 {% endhighlight %}
 
 `handleDir` check's the hero's next position and looks to see if it is
-a wall or do. If it is - the hero stays put, otherwise the hero gets to
+a wall or door. If it is - the hero stays put, otherwise the hero gets to
 move. We'll add support for collision with all of our objects when we
 build up the combat system.
 
