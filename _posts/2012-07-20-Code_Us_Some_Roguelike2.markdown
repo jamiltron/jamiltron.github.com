@@ -313,14 +313,14 @@ strsToLevel str = foldl populate emptyLevel {lMax=maxXY} asciiMap
     maxXY    = (maxX, maxY)
     populate lvl (coord, tile) =
       case tile of
-        '#'   -> lvl { lTiles = M.insert coord Wall            tiles }
-        '>'   -> lvl { lTiles = M.insert coord (St Downstairs) tiles }
-        '<'   -> lvl { lTiles = M.insert coord (St Upstairs)   tiles }
-        '+'   -> lvl { lTiles = M.insert coord (Dr Closed)     tiles }
-        '-'   -> lvl { lTiles = M.insert coord (Dr Open)       tiles }
-        '~'   -> lvl { lTiles = M.insert coord Acid            tiles }
+        '#'   -> lvl { lTiles = M.insert coord Wall            t }
+        '>'   -> lvl { lTiles = M.insert coord (St Downstairs) t }
+        '<'   -> lvl { lTiles = M.insert coord (St Upstairs)   t }
+        '+'   -> lvl { lTiles = M.insert coord (Dr Closed)     t }
+        '-'   -> lvl { lTiles = M.insert coord (Dr Open)       t }
+        '~'   -> lvl { lTiles = M.insert coord Acid            t }
         _     -> lvl
-        where tiles = lTiles lvl
+        where t = lTiles lvl
 
 {% endhighlight %}
 
