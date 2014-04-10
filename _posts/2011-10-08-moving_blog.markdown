@@ -1,10 +1,9 @@
 ---
 layout: post
 title: Moving My Blog to Github
-description: An update on what's going on and why this is here.
+excerpt: An update on what's going on and why this is here.
+category: Meta
 ---
-
-<h2 class="post_title">Moving My Blog to Github</h2>
 
 Hello there, I thought I would try out moving my blog to github, and test out
 this whole Jekyll thing. I would like to make my blog posts a little more

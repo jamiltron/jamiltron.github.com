@@ -2,28 +2,36 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<title>{{ page.title }}</title>
+<title>{% if page.title %} {{ page.title }} | {% endif %} {{ site.name }}</title>
 <style type="text/css" media="screen">
 @import '/css/reset.css';
 @import '/css/main.css';
-@import '/css/colors.css';
 @import '/css/pygments/default.css';
 </style>
-      <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
-      <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
-      </script>
+  <header>
+    <h1><a href="{{site.baseurl}}/">{{ site.name }}</a></h1>
+      <h4>{{ site.description }}</h4>
+      <hr />
+  </header>
 
-<h1 id="title">
-<a name="top"></a>Justin Hamilton</h1>
-<a href="http://jamiltron.github.com">Home</a> -
-<a href="http://jamiltron.github.com/about.html">About</a> -
-<a href="https://github.com/jamiltron">Github Profile</a>
-<br/>
+  <nav>
+    <ul>
+      <li><a href="{{site.baseurl}}/">Home</a></li>
+      <li><a href="{{site.baseurl}}/contact.html">Contact</a></li>
+      <li><a href="{{site.baseurl}}/archive.html">Archive</a></li>
+      <li><a href="https://github.com/jamiltron">Github</a></li>
+      <li><a href="https://twitter.com/jamiltron">@jamiltron</a></li>
+      <li><a href="{{site.baseurl}}/feed.xml">rss Feed</a></li>
+    </ul>
+  </nav>
 
-{{ content }}
+  <main>{{ content }}</main>
+  <footer>
+    <hr />
+    <p>&copy; <time>2014</time> {{ site.author }}</p>
+  </footer>
 </body>
 </html>

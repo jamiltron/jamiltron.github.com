@@ -1,7 +1,8 @@
 ---
 layout: post
 title: Code Us Some Roguelike in Haskell (Part 2)!
-description: Part 2 of the Roguelike tutorial.
+excerpt: Part 2 of the Roguelike tutorial.
+categories: [haskell, game dev, roguelike]
 ---
 
 <h2 class="post_title">Code Us Some Roguelike in Haskell (Part 2)!</h2>

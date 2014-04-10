@@ -1,7 +1,8 @@
 ---
 layout: post
 title: Code Us Some Roguelike in Haskell!
-description: A fun game project in Haskell.
+excerpt: A fun game project in Haskell.
+categories: [haskell, game dev, roguelike]
 ---
 
 <h2 class="post_title">Code Us Some Roguelike in Haskell!</h2>

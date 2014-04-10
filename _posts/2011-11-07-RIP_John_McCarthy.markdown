@@ -1,10 +1,9 @@
 ---
 layout: post
 title: RIP John McCarthy
-description: Another great loss.
+excerpt: Another great loss.
+category: Computer Science
 ---
-
-<h2 class="post_title">RIP John McCarthy</h2>
 
 The past few weeks have been very sad. A lot has been said about McCarthy, he is one of the giants of our field. 
 I am a Lisp fanatic, and honestly without having discovered Scheme and SICP years ago I would not be as interested in 

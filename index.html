@@ -1,12 +1,16 @@
 ---
 layout: default
-title: Justin Hamilton
 ---
 
-<div id="content"><br />
-  <h2>Posts</h2>
-    {% for post in site.posts %}
-    <a href="{{ post.url }}">{{ post.title }}</a> &raquo; <span>{{ post.date | date_to_string }}</span><br />
-    <p>{{ post.description }}</p><br />
-    {% endfor %}
-</div>
+<!-- Show last 5 posts -->
+<h2>Latest Posts</h2>
+{% for post in site.posts limit: 5 %}
+  <article>
+    <header>
+      <h3><a href="{{site.baseurl}}{{post.url}}">{{post.title}}</a></h3>
+      <span class="date"><time datetime="{{post.date|date:"%F"}}">{{post.date|date:"%b %d, %Y"}}</time></span>
+      <span class="category">{{post.categories | category_links}}</span><br/>
+    </header>
+    <div class="entry">{{post.excerpt}}</div>
+  </article>
+{% endfor %}

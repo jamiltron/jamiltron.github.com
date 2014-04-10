@@ -1,4 +1,12 @@
+name: Jamiltron
+site_title: Jamiltron
+description: Game Design, Programming, and Other Bits
 destination: ./_site
+author: Justin Hamilton
+author_email: justin@jamiltron.com
+category_dir: /
+baseurl:
+url: http://jamiltron.com
 auto: true
 lsi: false
 server_port: 4000

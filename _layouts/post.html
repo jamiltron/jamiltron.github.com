@@ -1,13 +1,16 @@
 ---
 layout: default
 ---
-<br />
-<div id="content">
-<div id="post">
-{{ content }}
+<article>
+  <header>
+    <h2>{{page.title}}</h2>
+    <span class="date"><time datetime="{{page.date|date:"%F"}}">{{page.date|date:"%b %d, %Y"}}</time></span>
+    <span class="category">{{ page.categories | category_links }}</span><br/>
+  </header>
 
-<br />
-<br />
+  <div class="entry">{{content}}</div>
+</article><br /><br />
+
 <div id="disqus_thread"></div>
 <script type="text/javascript">
   (function() {
@@ -17,6 +20,3 @@ layout: default
   })();
 </script>
 <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
-</div>
-
-</div></div>
