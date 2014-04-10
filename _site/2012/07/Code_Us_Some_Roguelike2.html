@@ -1,0 +1,580 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title> Code Us Some Roguelike in Haskell (Part 2)! |  Jamiltron</title>
+<style type="text/css" media="screen">
+@import '/css/reset.css';
+@import '/css/main.css';
+@import '/css/pygments/default.css';
+</style>
+</head>
+
+<body>
+  <header>
+    <h1><a href="/">Jamiltron</a></h1>
+      <h4>Game Design, Programming, and Other Bits</h4>
+      <hr />
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/contact.html">Contact</a></li>
+      <li><a href="/archive.html">Archive</a></li>
+      <li><a href="https://github.com/jamiltron">Github</a></li>
+      <li><a href="https://twitter.com/jamiltron">@jamiltron</a></li>
+      <li><a href="/feed.xml">rss Feed</a></li>
+    </ul>
+  </nav>
+
+  <main><article>
+  <header>
+    <h2>Code Us Some Roguelike in Haskell (Part 2)!</h2>
+    <span class="date"><time datetime="2012-07-20">Jul 20, 2012</time></span>
+    <span class="category"><a href="/game dev/">game dev</a>, <a href="/haskell/">haskell</a>, and <a href="/roguelike/">roguelike</a></span><br/>
+  </header>
+
+  <div class="entry"><h2 class='post_title'>Code Us Some Roguelike in Haskell (Part 2)!</h2>
+<p>This is part 2 of a multi-part tutorial:</p>
+
+<p><a href="http://jamiltron.com/2012/07/Code_Us_Some_Roguelike_in_Haskell.html">Part 1</a></p>
+
+<h3 id="design_decisions">Design Decisions</h3>
+
+<p>This post is more focused on what sort of a game we are making. For purposes of this tutorial Thieflike must be relatively small. The idea of roguelikes may be a little different for each person, so I want to go over the things I think needs to be in this game to place it within that genre:</p>
+
+<ul>
+<li>Random dungeons</li>
+
+<li>Monsters</li>
+
+<li>Gear &amp; Potions</li>
+
+<li>Treasure</li>
+
+<li>Doors and the bashing thereof</li>
+
+<li>Environmental stuff within the dungeon (pits, traps, etc.)</li>
+
+<li>Line-of-Sight</li>
+
+<li>Mapping</li>
+</ul>
+
+<p>Even with such a small set of features the game could get pretty hairy. Especially since we intend to eventually add support for a graphical front-end beyond the console. How can we keep each of those things in the game, while still keeping it simple?</p>
+
+<h4 id="random_dungeons">Random Dungeons</h4>
+
+<p>While there are all sorts of awesome ways to randomize each level, we will be sticking to something like the traditional method used in Rogue. This may not produce the snazziest environments around, but it will serve the purpose and prevent our levels from becoming superfluous given the number of elements we are playing with.</p>
+
+<p>We’ll also be implementing a system for random/wandering monsters and treasure layout similar to the old D&amp;D Red Box, where each room has specific random percentages for oddities.</p>
+
+<p>Since we’re making our design decision right now we won’t be doing the random dungeon part until next post, this time I’ll be copping out with a pre-created string.</p>
+
+<h4 id="monsters">Monsters</h4>
+
+<p>This may be blasphemous - but we’ll only have one enemy type, and its strength will be based entirely around how deep within the dungeon it is. We can always add more later, but this will keep complexity down initially.</p>
+
+<p>Let’s call this monster type ‘villain’, just because I think that’s a funny monster type name. You can call it ‘orc’, or ‘were-gelatinous cube’, or whatever you like.</p>
+
+<p>Last tutorial we kept all of our data type declarations in Main, but now we’re going to have a ton more. For now let’s break those out into a new file called <code>Types.hs</code> in the same directory as <code>Main.hs</code></p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>--file: Types.hs</span>
+<span class='kr'>module</span> <span class='nn'>Types</span> <span class='kr'>where</span>
+
+<span class='kr'>import</span> <span class='k'>qualified</span> <span class='nn'>Data.Map</span> <span class='k'>as</span> <span class='n'>M</span>
+
+<span class='kr'>type</span> <span class='kt'>Coord</span> <span class='ow'>=</span> <span class='p'>(</span><span class='kt'>Int</span><span class='p'>,</span> <span class='kt'>Int</span><span class='p'>)</span>
+
+<span class='c1'>-- foul beasts</span>
+<span class='kr'>data</span> <span class='kt'>Villain</span> <span class='ow'>=</span> <span class='kt'>Villain</span> <span class='p'>{</span> <span class='n'>vCurrPos</span> <span class='ow'>::</span> <span class='kt'>Coord</span>
+                       <span class='p'>,</span> <span class='n'>vGold</span>    <span class='ow'>::</span> <span class='kt'>Int</span>
+                       <span class='p'>,</span> <span class='n'>vHP</span>      <span class='ow'>::</span> <span class='kt'>Int</span>
+                       <span class='p'>,</span> <span class='n'>vItems</span>   <span class='ow'>::</span> <span class='p'>[</span><span class='kt'>Item</span><span class='p'>]</span>
+                       <span class='p'>,</span> <span class='n'>vOldPos</span>  <span class='ow'>::</span> <span class='kt'>Coord</span> <span class='p'>}</span>
+</code></pre></div>
+<p>We move <code>Coord</code> from <code>Main.hs</code> into <code>Types.hs</code> and we import <code>Data.Map</code>, because a lot of our data will be stored in a map. There are many name clashes in a lot of the <code>Data.*</code> libraries, so I always like to qualify the import as the first letter of the primary data type provided.</p>
+
+<p><code>vCurrPos</code> and <code>vOldPos</code> are coordinates to where the villain is currently, and where they were last turn. We’ll be using this to make sure we only draw positions on screen that have actually changed. The other attributes are obvious monster stuff - how many hit points a creature has left, what gold its carrying, and what items it possesses…which leads us to our next point.</p>
+
+<h4 id="gear">Gear</h4>
+
+<p>The only gear that is essential for me is weapons, potions, and armor. Since we aren’t including a leveling or skill system, the gear a hero finds will kind of be progress, assuming the deeper the dungeon level is the better its gear is.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Types.hs</span>
+
+<span class='kr'>data</span> <span class='kt'>Item</span> <span class='ow'>=</span> <span class='kt'>Arm</span> <span class='kt'>Armor</span>
+          <span class='o'>|</span> <span class='kt'>Pot</span> <span class='kt'>Potion</span>
+          <span class='o'>|</span> <span class='kt'>Weap</span> <span class='kt'>Weapon</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Armor</span> <span class='ow'>=</span> <span class='kt'>Armor</span> <span class='p'>{</span> <span class='n'>aDefense</span> <span class='ow'>::</span> <span class='kt'>Int</span>
+                   <span class='p'>,</span> <span class='n'>aDest</span>    <span class='ow'>::</span> <span class='kt'>String</span> <span class='p'>}</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Potion</span> <span class='ow'>=</span> <span class='kt'>Potion</span> <span class='p'>{</span> <span class='n'>pAmount</span> <span class='ow'>::</span> <span class='kt'>Int</span>
+                     <span class='p'>,</span> <span class='n'>pDesc</span>   <span class='ow'>::</span> <span class='kt'>String</span>
+                     <span class='p'>,</span> <span class='n'>pEffect</span> <span class='ow'>::</span> <span class='kt'>Effect</span> <span class='p'>}</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Effect</span> <span class='ow'>=</span> <span class='kt'>Harm</span>
+            <span class='o'>|</span> <span class='kt'>Heal</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Weapon</span> <span class='ow'>=</span> <span class='kt'>Weapon</span> <span class='p'>{</span> <span class='n'>wDamage</span> <span class='ow'>::</span> <span class='kt'>Int</span>
+                     <span class='p'>,</span> <span class='n'>wDesc</span>   <span class='ow'>::</span> <span class='kt'>String</span>
+                     <span class='p'>,</span> <span class='n'>wToHit</span>  <span class='ow'>::</span> <span class='kt'>Int</span> <span class='p'>}</span>
+</code></pre></div>
+<p>Most of the item attributes will become more obvious when we begin putting together the combat system.</p>
+
+<h4 id="treasure">Treasure</h4>
+
+<p>Just like monsters, there will be only one form of currency laid out throughout the dungeon - gold. It also won’t really do anything other than provide a score system.</p>
+
+<h4 id="environmental_stuff">Environmental Stuff</h4>
+
+<p>Most of the things that can’t be fought/picked-up will be represented as tiles - stairs, doors, etc. To keep down on what we need to program we won’t be implementing traps, but we should have at least one damaging environmental hazard - let’s put in giant pools of acid.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Types.hs</span>
+
+<span class='kr'>data</span> <span class='kt'>Tile</span> <span class='ow'>=</span> <span class='kt'>Acid</span>
+          <span class='o'>|</span> <span class='kt'>Dr</span>   <span class='kt'>Door</span>
+          <span class='o'>|</span> <span class='kt'>St</span>   <span class='kt'>Stairs</span>
+          <span class='o'>|</span> <span class='kt'>Wall</span> 
+
+
+<span class='kr'>data</span> <span class='kt'>Door</span> <span class='ow'>=</span> <span class='kt'>Closed</span>
+          <span class='o'>|</span> <span class='kt'>Open</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Stairs</span> <span class='ow'>=</span> <span class='kt'>Downstairs</span>
+            <span class='o'>|</span> <span class='kt'>Upstairs</span>
+</code></pre></div>
+<h4 id="lineofsight_and_mapping">Line-of-Sight and Mapping</h4>
+
+<p>We’ll implement mapping by keeping a dictionary of coordinates with a <code>Bool</code> of whether or not the space has been mapped before. Line-of-sight will be discussed in a later post.</p>
+
+<p><br /></p>
+
+<h3 id="wrapping_up_types">Wrapping up Types</h3>
+
+<p>We still need to move our Hero, Input and World declaration from <code>Main.hs</code> to <code>Types.hs</code>. We also need to set up a data type to represent the level.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Types.hs</span>
+
+<span class='kr'>data</span> <span class='kt'>Input</span> <span class='ow'>=</span> <span class='kt'>Dir</span> <span class='kt'>Direction</span>
+           <span class='o'>|</span> <span class='kt'>Exit</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Direction</span> <span class='ow'>=</span> <span class='kt'>Up</span>
+               <span class='o'>|</span> <span class='kt'>Down</span>
+               <span class='o'>|</span> <span class='kt'>Left</span>
+               <span class='o'>|</span> <span class='kt'>Right</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Hero</span> <span class='ow'>=</span> <span class='kt'>Hero</span> <span class='p'>{</span> <span class='n'>hCurrPos</span> <span class='ow'>::</span> <span class='kt'>Coord</span>   
+                 <span class='p'>,</span> <span class='n'>hGold</span>    <span class='ow'>::</span> <span class='kt'>Int</span>    
+                 <span class='p'>,</span> <span class='n'>hHP</span>      <span class='ow'>::</span> <span class='kt'>Int</span>    
+                 <span class='p'>,</span> <span class='n'>hItems</span>   <span class='ow'>::</span> <span class='p'>[</span><span class='kt'>Item</span><span class='p'>]</span> 
+                 <span class='p'>,</span> <span class='n'>hOldPos</span>  <span class='ow'>::</span> <span class='kt'>Coord</span>  
+                 <span class='p'>,</span> <span class='n'>hWield</span>   <span class='ow'>::</span> <span class='kt'>Weapon</span> 
+                 <span class='p'>,</span> <span class='n'>hWears</span>   <span class='ow'>::</span> <span class='kt'>Armor</span>  <span class='p'>}</span>
+
+
+<span class='kr'>data</span> <span class='kt'>Level</span> <span class='ow'>=</span> <span class='kt'>Level</span> <span class='p'>{</span> <span class='n'>lDepth</span>    <span class='ow'>::</span> <span class='kt'>Int</span>                   
+                   <span class='p'>,</span> <span class='n'>lGold</span>     <span class='ow'>::</span> <span class='kt'>M</span><span class='o'>.</span><span class='kt'>Map</span> <span class='kt'>Coord</span> <span class='kt'>Int</span>  
+                   <span class='p'>,</span> <span class='n'>lItems</span>    <span class='ow'>::</span> <span class='kt'>M</span><span class='o'>.</span><span class='kt'>Map</span> <span class='kt'>Coord</span> <span class='kt'>Item</span> 
+                   <span class='p'>,</span> <span class='n'>lMapped</span>   <span class='ow'>::</span> <span class='kt'>M</span><span class='o'>.</span><span class='kt'>Map</span> <span class='kt'>Coord</span> <span class='kt'>Bool</span>
+                   <span class='p'>,</span> <span class='n'>lMax</span>      <span class='ow'>::</span> <span class='kt'>Coord</span>            
+                   <span class='p'>,</span> <span class='n'>lTiles</span>    <span class='ow'>::</span> <span class='kt'>M</span><span class='o'>.</span><span class='kt'>Map</span> <span class='kt'>Coord</span> <span class='kt'>Tile</span> 
+                   <span class='p'>,</span> <span class='n'>lVillains</span> <span class='ow'>::</span> <span class='kt'>M</span><span class='o'>.</span><span class='kt'>Map</span> <span class='kt'>Coord</span> <span class='kt'>Villain</span> <span class='p'>}</span> 
+
+
+<span class='kr'>data</span> <span class='kt'>World</span> <span class='ow'>=</span> <span class='kt'>World</span> <span class='p'>{</span> <span class='n'>wDepth</span>  <span class='ow'>::</span> <span class='kt'>Int</span>
+                   <span class='p'>,</span> <span class='n'>wHero</span>   <span class='ow'>::</span> <span class='kt'>Hero</span>     
+                   <span class='p'>,</span> <span class='n'>wLevel</span>  <span class='ow'>::</span> <span class='kt'>Level</span>    
+                   <span class='p'>,</span> <span class='n'>wLevels</span> <span class='ow'>::</span> <span class='p'>[</span><span class='kt'>Level</span><span class='p'>]</span> <span class='p'>}</span>
+</code></pre></div>
+<p>The Hero is pretty straightforward - similar to the villain except the Hero can wield weapons and wear armor.</p>
+
+<p>Level needs some explaining. Now, I’m not saying I’m an expert roguelike or game developer and I’m not saying this is necessarily the best way to represent a world, but it certainly works. <code>lDepth</code> says how deep in the dungeon this particular level is, and <code>lMax</code> is the largest (x,y) coordinate for the level. Every other attribute is a mapping from coords to a representative type.</p>
+
+<p>To get the game up and running we need to come up with some defaults data structures. I’ll be cheating a little on the default level and the hero’s position, but we’ll fix that when we generate random worlds.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Types.hs</span>
+
+<span class='nf'>emptyLevel</span> <span class='ow'>=</span> <span class='kt'>Level</span> <span class='p'>{</span> <span class='n'>lDepth</span>    <span class='ow'>=</span> <span class='mi'>0</span>
+                   <span class='p'>,</span> <span class='n'>lGold</span>     <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>empty</span>
+                   <span class='p'>,</span> <span class='n'>lItems</span>    <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>empty</span>
+                   <span class='p'>,</span> <span class='n'>lMapped</span>   <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>fromList</span> <span class='p'>[((</span><span class='mi'>1</span><span class='p'>,</span><span class='mi'>1</span><span class='p'>),</span> <span class='kt'>True</span><span class='p'>)]</span>
+                   <span class='p'>,</span> <span class='n'>lMax</span>      <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>1</span><span class='p'>,</span><span class='mi'>1</span><span class='p'>)</span>  
+                   <span class='p'>,</span> <span class='n'>lTiles</span>    <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>empty</span>
+                   <span class='p'>,</span> <span class='n'>lVillains</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>empty</span> <span class='p'>}</span>
+
+
+<span class='c1'>-- bare fists/no weapon</span>
+<span class='nf'>fists</span> <span class='ow'>=</span> <span class='kt'>Weapon</span> <span class='mi'>0</span> <span class='s'>&quot;Bare fists&quot;</span> <span class='mi'>0</span>
+
+
+<span class='c1'>-- no armor</span>
+<span class='nf'>rags</span> <span class='ow'>=</span> <span class='kt'>Armor</span> <span class='mi'>0</span> <span class='s'>&quot;Rags&quot;</span>
+
+
+<span class='c1'>-- a basic world used to start the game</span>
+<span class='nf'>genesis</span>  <span class='ow'>=</span> <span class='kt'>World</span> <span class='p'>{</span> <span class='n'>wDepth</span>  <span class='ow'>=</span> <span class='mi'>0</span>
+           <span class='p'>,</span> <span class='n'>wHero</span>   <span class='ow'>=</span> <span class='n'>commoner</span>  
+           <span class='p'>,</span> <span class='n'>wLevel</span>  <span class='ow'>=</span> <span class='n'>emptyLevel</span>
+           <span class='p'>,</span> <span class='n'>wLevels</span> <span class='ow'>=</span> <span class='p'>[</span><span class='n'>emptyLevel</span><span class='p'>]</span> <span class='p'>}</span>  <span class='c1'>-- all levels</span>
+
+
+<span class='c1'>-- a basic hero</span>
+<span class='nf'>commoner</span> <span class='ow'>=</span> <span class='kt'>Hero</span> <span class='p'>{</span> <span class='n'>hCurrPos</span> <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>1</span><span class='p'>,</span><span class='mi'>1</span><span class='p'>)</span>
+                <span class='p'>,</span> <span class='n'>hGold</span>   <span class='ow'>=</span> <span class='mi'>0</span>  
+                <span class='p'>,</span> <span class='n'>hHP</span>     <span class='ow'>=</span> <span class='mi'>10</span> 
+                <span class='p'>,</span> <span class='n'>hItems</span>  <span class='ow'>=</span> <span class='kt'>[]</span> 
+                <span class='p'>,</span> <span class='n'>hOldPos</span> <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>1</span><span class='p'>,</span><span class='mi'>1</span><span class='p'>)</span>
+                <span class='p'>,</span> <span class='n'>hWeild</span>  <span class='ow'>=</span> <span class='n'>fists</span>
+                <span class='p'>,</span> <span class='n'>hWears</span>  <span class='ow'>=</span> <span class='n'>rags</span> <span class='p'>}</span>
+</code></pre></div>
+<p><br /></p>
+
+<h3 id="building_a_test_level">Building a Test Level</h3>
+
+<p>If we’re going to build a small test level we’re going to need a couple functions to help out. Open a new file and call it <code>Level.hs</code>. Usual imports here:</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Level.hs</span>
+<span class='kr'>module</span> <span class='nn'>Level</span> <span class='kr'>where</span>
+
+<span class='kr'>import</span> <span class='k'>qualified</span> <span class='nn'>Data.Map</span>  <span class='k'>as</span> <span class='n'>M</span>
+
+<span class='kr'>import</span> <span class='nn'>Types</span>
+</code></pre></div>
+<p>The initial level will be given to us as a string, so we’ll need to translate characters into our maps.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Level.hs</span>
+
+<span class='nf'>strsToLevel</span> <span class='ow'>::</span> <span class='p'>[</span><span class='kt'>String</span><span class='p'>]</span> <span class='ow'>-&gt;</span> <span class='kt'>Level</span>
+<span class='nf'>strsToLevel</span> <span class='n'>str</span> <span class='ow'>=</span> <span class='n'>foldl</span> <span class='n'>populate</span> <span class='n'>emptyLevel</span> <span class='p'>{</span><span class='n'>lMax</span><span class='ow'>=</span><span class='n'>maxXY</span><span class='p'>}</span> <span class='n'>asciiMap</span>
+  <span class='kr'>where</span>
+    <span class='n'>asciiMap</span> <span class='ow'>=</span> <span class='n'>concat</span> <span class='o'>$</span> <span class='n'>zipWith</span> <span class='n'>zip</span> <span class='n'>coords</span> <span class='n'>str</span>
+    <span class='n'>coords</span>   <span class='ow'>=</span> <span class='p'>[[(</span><span class='n'>x</span><span class='p'>,</span> <span class='n'>y</span><span class='p'>)</span> <span class='o'>|</span> <span class='n'>x</span> <span class='ow'>&lt;-</span> <span class='p'>[</span><span class='mi'>0</span><span class='o'>..</span><span class='p'>]]</span> <span class='o'>|</span> <span class='n'>y</span> <span class='ow'>&lt;-</span> <span class='p'>[</span><span class='mi'>0</span><span class='o'>..</span><span class='p'>]]</span>
+    <span class='n'>maxX</span>     <span class='ow'>=</span> <span class='n'>maximum</span> <span class='o'>.</span> <span class='n'>map</span> <span class='p'>(</span><span class='n'>fst</span> <span class='o'>.</span> <span class='n'>fst</span><span class='p'>)</span> <span class='o'>$</span> <span class='n'>asciiMap</span>
+    <span class='n'>maxY</span>     <span class='ow'>=</span> <span class='n'>maximum</span> <span class='o'>.</span> <span class='n'>map</span> <span class='p'>(</span><span class='n'>snd</span> <span class='o'>.</span> <span class='n'>fst</span><span class='p'>)</span> <span class='o'>$</span> <span class='n'>asciiMap</span>
+    <span class='n'>maxXY</span>    <span class='ow'>=</span> <span class='p'>(</span><span class='n'>maxX</span><span class='p'>,</span> <span class='n'>maxY</span><span class='p'>)</span>
+    <span class='n'>populate</span> <span class='n'>lvl</span> <span class='p'>(</span><span class='n'>coord</span><span class='p'>,</span> <span class='n'>tile</span><span class='p'>)</span> <span class='ow'>=</span>
+      <span class='kr'>case</span> <span class='n'>tile</span> <span class='kr'>of</span>
+        <span class='sc'>&#39;#&#39;</span>   <span class='ow'>-&gt;</span> <span class='n'>lvl</span> <span class='p'>{</span> <span class='n'>lTiles</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>insert</span> <span class='n'>coord</span> <span class='kt'>Wall</span>            <span class='n'>t</span> <span class='p'>}</span>
+        <span class='sc'>&#39;&gt;&#39;</span>   <span class='ow'>-&gt;</span> <span class='n'>lvl</span> <span class='p'>{</span> <span class='n'>lTiles</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>insert</span> <span class='n'>coord</span> <span class='p'>(</span><span class='kt'>St</span> <span class='kt'>Downstairs</span><span class='p'>)</span> <span class='n'>t</span> <span class='p'>}</span>
+        <span class='sc'>&#39;&lt;&#39;</span>   <span class='ow'>-&gt;</span> <span class='n'>lvl</span> <span class='p'>{</span> <span class='n'>lTiles</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>insert</span> <span class='n'>coord</span> <span class='p'>(</span><span class='kt'>St</span> <span class='kt'>Upstairs</span><span class='p'>)</span>   <span class='n'>t</span> <span class='p'>}</span>
+        <span class='sc'>&#39;+&#39;</span>   <span class='ow'>-&gt;</span> <span class='n'>lvl</span> <span class='p'>{</span> <span class='n'>lTiles</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>insert</span> <span class='n'>coord</span> <span class='p'>(</span><span class='kt'>Dr</span> <span class='kt'>Closed</span><span class='p'>)</span>     <span class='n'>t</span> <span class='p'>}</span>
+        <span class='sc'>&#39;-&#39;</span>   <span class='ow'>-&gt;</span> <span class='n'>lvl</span> <span class='p'>{</span> <span class='n'>lTiles</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>insert</span> <span class='n'>coord</span> <span class='p'>(</span><span class='kt'>Dr</span> <span class='kt'>Open</span><span class='p'>)</span>       <span class='n'>t</span> <span class='p'>}</span>
+        <span class='sc'>&#39;~&#39;</span>   <span class='ow'>-&gt;</span> <span class='n'>lvl</span> <span class='p'>{</span> <span class='n'>lTiles</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>insert</span> <span class='n'>coord</span> <span class='kt'>Acid</span>            <span class='n'>t</span> <span class='p'>}</span>
+        <span class='kr'>_</span>     <span class='ow'>-&gt;</span> <span class='n'>lvl</span>
+        <span class='kr'>where</span> <span class='n'>t</span> <span class='ow'>=</span> <span class='n'>lTiles</span> <span class='n'>lvl</span>
+</code></pre></div>
+<p>Most of this function is shorthand , let’s take a look at it piece by piece.</p>
+
+<p><code>asciiMap</code> is a list of tuples with a <code>Coord</code> as the first element, and a character from the string as the second. The types here are important to understand what’s going on. <code>zipWith :: (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]</code>, <code>zip :: [a] -&gt; [b] -&gt; [(a, b)]</code>, <code>coords</code> is <i>basically</i> <code>[[Coord]]</code> and <code>str :: [String]</code>. So <code>zip</code> is <code>zipWith</code>’s <code>(a -&gt; b -&gt; c)</code>, <code>[[Coord]]</code> is <code>zip</code>’s <code>[[a]]</code>, etc.</p>
+
+<p><code>coords</code> may seem confusing if you’re coming from a language that doesn’t support lazy lists. It is in fact a a list of lists, where the first element is a list of <i>basically</i> <code>Coords</code>, all with <code>y</code> bound to <code>0</code> and <code>x</code> bound to <code>[0..infinity]</code>. Each additional element binds <code>y</code> to successively greater values. In a nutshell, this is building a list of infinite coordinates, where each element represents a row with an infinite number of columns. Fortunately <code>zip</code> tangles our problem of infinity - it only ties as many elements to each actual row as there are available in <code>str</code>. By <code>zipWith</code>ing <code>zip</code> we’re able to combine each coord to its corresponding character in char, but we have one problem left over - they are all one list too deep. Fortunately <code>concat</code> solves this for us. <code>concat :: [[a]] -&gt; [a]</code> ‘flattens’ a list of lists one-level.</p>
+
+<p>If this doesn’t make much sense at first I’d suggest playing around with functions like <code>zip</code> and <code>zipWith</code>. They are immensely useful, along with functions like the <code>fold</code>s and <code>scan</code>s for manipulating sequences functionally and elegantly where one may have thought required some sort of an iterative loop. In this case its easy to keep <code>coords</code> contained in <code>strsToLevel</code> because that’s the only place its going to be used, but when crafting your own sequencing functions if you find them difficult you may want to break them out into their own top-level functions so you can check the types easier with either GHC or GHCi.</p>
+
+<p>After building up our <code>asciiMap</code> we <code>foldl</code> an empty level (plus calculated max value based on the dimensions of <code>str</code>) over a function we’re calling <code>populate</code>. So we take our level, consume the next character in <code>asciiMap</code>, and return a new level for further folding (if there are any chars left). <code>populate</code> looks for specific characters and inserts them into the level being returned.</p>
+
+<p>Another set of functions we’re going to need is determining if a particular <code>Coord</code> is one of our dungeon features or not. Fortunately because our game is so simple we can basically just set functions like <code>isGold</code> to be <code>Data.Map</code>’s <code>member</code> function for a given level’s <code>lGold</code> map. There are a few cases where we do have to perform a <code>lookup</code> on our maps, such as with <code>Item</code>s and <code>Tile</code>s, because we support multiple types within those corresponding dictionaries.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Level.hs</span>
+
+<span class='nf'>isAcid</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lTiles</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='kt'>Acid</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>         <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isClosedDoor</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lTiles</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>Dr</span> <span class='kt'>Closed</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>                <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isOpenDoor</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lTiles</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>Dr</span> <span class='kt'>Open</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>              <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isWall</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lTiles</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='kt'>Wall</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>         <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isDownstairs</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lTiles</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>St</span> <span class='kt'>Downstairs</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>                    <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isUpstairs</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lTiles</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>St</span> <span class='kt'>Upstairs</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>                  <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isGold</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>member</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lGold</span> <span class='n'>lvl</span><span class='p'>)</span>
+
+
+<span class='nf'>isVillain</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>member</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lVillains</span> <span class='n'>lvl</span><span class='p'>)</span>
+
+
+<span class='nf'>isArmor</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lItems</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>Arm</span> <span class='kr'>_</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>            <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isPotion</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lItems</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>Pot</span> <span class='kr'>_</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>            <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+
+
+<span class='nf'>isWeapon</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='kt'>M</span><span class='o'>.</span><span class='n'>lookup</span> <span class='n'>coord</span> <span class='p'>(</span><span class='n'>lItems</span> <span class='n'>lvl</span><span class='p'>)</span> <span class='kr'>of</span>
+  <span class='kt'>Just</span> <span class='p'>(</span><span class='kt'>Weap</span> <span class='kr'>_</span><span class='p'>)</span> <span class='ow'>-&gt;</span> <span class='kt'>True</span>
+  <span class='kr'>_</span>             <span class='ow'>-&gt;</span> <span class='kt'>False</span>
+</code></pre></div>
+<p>And finally finishing up level for now we’ll construct a ‘cheater’ level until we get the random dungeon generator up and running.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Level.hs</span>
+
+<span class='nf'>map1</span>   <span class='ow'>=</span> <span class='p'>[</span> <span class='s'>&quot;##############&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;#&gt;           #          ######&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;#            ############    #&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;#            -          +    #&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;#    ~~      ############    #&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;#     ~~     #          #    #&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;#      ~~    #          # &lt;  #&quot;</span>
+         <span class='p'>,</span> <span class='s'>&quot;##############          ######&quot;</span> <span class='p'>]</span>
+            
+
+<span class='nf'>level1</span> <span class='ow'>=</span> <span class='n'>strsToLevel</span> <span class='n'>map1</span>
+</code></pre></div>
+<p>I’ve never quite been a fan of how hallways are typically represented in roguelikes, so they’ll just look like really long rooms.</p>
+
+<p><br /></p>
+
+<h3 id="graphics">Graphics</h3>
+
+<p>While we’re handling breaking level out into its own file, let’s break out all of the drawing into one file. We’ll call it <code>Console.hs</code>, because we eventually want to make a GUI front-end as well.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Console.hs</span>
+
+<span class='kr'>module</span> <span class='nn'>Console</span> <span class='kr'>where</span>
+
+<span class='kr'>import</span> <span class='nn'>System.Console.ANSI</span>
+
+<span class='kr'>import</span> <span class='nn'>Level</span>
+<span class='kr'>import</span> <span class='nn'>Types</span>
+
+
+<span class='nf'>coordToChar</span> <span class='n'>coord</span> <span class='p'>(</span><span class='kt'>World</span> <span class='kr'>_</span> <span class='n'>hero</span> <span class='n'>lvl</span> <span class='kr'>_</span><span class='p'>)</span>
+  <span class='o'>|</span> <span class='n'>hCurrPos</span> <span class='n'>hero</span> <span class='o'>==</span> <span class='n'>coord</span>      <span class='ow'>=</span> <span class='sc'>&#39;@&#39;</span>
+  <span class='o'>|</span> <span class='n'>isAcid</span>        <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;~&#39;</span>
+  <span class='o'>|</span> <span class='n'>isClosedDoor</span>  <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;+&#39;</span>
+  <span class='o'>|</span> <span class='n'>isOpenDoor</span>    <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;-&#39;</span>
+  <span class='o'>|</span> <span class='n'>isDownstairs</span>  <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;&lt;&#39;</span>
+  <span class='o'>|</span> <span class='n'>isGold</span>        <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;$&#39;</span>
+  <span class='o'>|</span> <span class='n'>isPotion</span>      <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;!&#39;</span>
+  <span class='o'>|</span> <span class='n'>isUpstairs</span>    <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;&gt;&#39;</span>
+  <span class='o'>|</span> <span class='n'>isVillain</span>     <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='n'>&#39;v&#39;</span>
+  <span class='o'>|</span> <span class='n'>isWall</span>        <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;#&#39;</span>
+  <span class='o'>|</span> <span class='n'>isWeapon</span>      <span class='n'>coord</span> <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='sc'>&#39;)&#39;</span>
+  <span class='o'>|</span> <span class='n'>otherwise</span>                   <span class='ow'>=</span> <span class='sc'>&#39; &#39;</span>
+
+
+<span class='nf'>drawChar</span> <span class='sc'>&#39;@&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Blue</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;@&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;#&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Black</span> <span class='p'>]</span>
+  <span class='n'>putChar</span>  <span class='sc'>&#39;#&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;!&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Magenta</span><span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;!&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;$&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Yellow</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;$&#39;</span>
+<span class='nf'>drawChar</span> <span class='n'>&#39;v&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Red</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='n'>&#39;v&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;)&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Cyan</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;)&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;&gt;&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Dull</span> <span class='kt'>Blue</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;&gt;&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;&lt;&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Dull</span> <span class='kt'>Cyan</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;&lt;&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;</span><span class='se'>\n</span><span class='sc'>&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;</span><span class='se'>\n</span><span class='sc'>&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;+&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>NormalIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Dull</span> <span class='kt'>Magenta</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;+&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;-&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>NormalIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Dull</span> <span class='kt'>Yellow</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;-&#39;</span>
+<span class='nf'>drawChar</span> <span class='sc'>&#39;~&#39;</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Green</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39;~&#39;</span>  
+<span class='nf'>drawChar</span> <span class='kr'>_</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Black</span> <span class='p'>]</span>
+  <span class='n'>putChar</span> <span class='sc'>&#39; &#39;</span>
+</code></pre></div>
+<p>Those functions should be pretty straight forward, go ahead and change the colors and intensities to whatever you wish. Now let’s remove the various draw functions from <code>Main.hs</code> and make new versions of them.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Console.hs</span>
+
+<span class='nf'>drawCoord</span> <span class='n'>world</span> <span class='n'>coord</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>uncurry</span> <span class='p'>(</span><span class='n'>flip</span> <span class='n'>setCursorPosition</span><span class='p'>)</span> <span class='n'>coord</span>
+  <span class='n'>drawChar</span> <span class='p'>(</span><span class='n'>coordToChar</span> <span class='n'>coord</span> <span class='n'>world</span><span class='p'>)</span> 
+  
+  
+<span class='nf'>drawHero</span> <span class='n'>world</span>
+  <span class='o'>|</span> <span class='n'>newPos</span> <span class='o'>==</span> <span class='n'>oldPos</span> <span class='ow'>=</span> <span class='n'>return</span> <span class='nb'>()</span>
+  <span class='o'>|</span> <span class='n'>otherwise</span>        <span class='ow'>=</span> <span class='kr'>do</span>
+    <span class='n'>drawCoord</span> <span class='n'>world</span> <span class='n'>newPos</span>
+    <span class='n'>drawCoord</span> <span class='n'>world</span> <span class='n'>oldPos</span>
+  <span class='kr'>where</span>
+    <span class='n'>hero</span>   <span class='ow'>=</span> <span class='n'>wHero</span> <span class='n'>world</span>
+    <span class='n'>newPos</span> <span class='ow'>=</span> <span class='n'>hCurrPos</span> <span class='n'>hero</span>
+    <span class='n'>oldPos</span> <span class='ow'>=</span> <span class='n'>hOldPos</span>  <span class='n'>hero</span>
+  
+
+<span class='nf'>drawWorld</span> <span class='n'>world</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setCursorPosition</span> <span class='mi'>0</span> <span class='mi'>0</span>
+  <span class='n'>mapM_</span> <span class='n'>drawChar</span> <span class='p'>(</span><span class='n'>unlines</span> <span class='n'>chars</span><span class='p'>)</span>
+  <span class='kr'>where</span>
+    <span class='n'>lvl</span>     <span class='ow'>=</span> <span class='n'>wLevel</span> <span class='n'>world</span>
+    <span class='p'>(</span><span class='n'>x&#39;</span><span class='p'>,</span><span class='n'>y&#39;</span><span class='p'>)</span> <span class='ow'>=</span> <span class='n'>lMax</span> <span class='n'>lvl</span>
+    <span class='n'>chars</span>   <span class='ow'>=</span> <span class='p'>[[</span><span class='n'>coordToChar</span> <span class='p'>(</span><span class='n'>x</span><span class='p'>,</span><span class='n'>y</span><span class='p'>)</span> <span class='n'>world</span> <span class='o'>|</span> <span class='n'>x</span> <span class='ow'>&lt;-</span> <span class='p'>[</span><span class='mi'>0</span><span class='o'>..</span><span class='n'>x&#39;</span><span class='p'>]]</span>
+                                        <span class='o'>|</span> <span class='n'>y</span> <span class='ow'>&lt;-</span> <span class='p'>[</span><span class='mi'>0</span><span class='o'>..</span><span class='n'>y&#39;</span><span class='p'>]]</span>
+</code></pre></div>
+<p><code>drawCoord</code> does something a little funky - I should have mentioned in my first post that while our <code>Coord</code>s are <code>(x, y)</code>, <code>setCursorPosition</code> is looking for input in the style of <code>y -&gt; x</code>. So we <code>flip</code> that function to get it to accept <code>x</code> first, and then we <code>uncurry</code> it. That transforms it from being a normal curried function into being a function that will accept our <code>Coord</code>.</p>
+
+<p><code>drawHero</code> is pretty obvious, we just make sure to redraw the coord that the hero was previously on, and then draw the position of the hero as it is currently. This will keep our draws down.</p>
+
+<p><code>drawWorld</code> is only intended to be drawn every so often. It sets the cursor to the top-left of the screen, and then it draws all the characters from left to right, top to bottom. We use the same infinite list of list of coords that we did in <code>strsToLevel</code>, and we <code>unlines</code> it to intersperse newlines inbetween each row so that we don’t get one long line of every character on the map.</p>
+
+<p>That does it for <code>Console.hs</code>, let’s get <code>Main.hs</code> done and get to playing. Or rather, get to moving a guy around a map, but at least we got most of the foundation for the game pretty much down!</p>
+
+<p><br /></p>
+
+<h3 id="main">Main</h3>
+
+<p>Start out by importing everything we’ve done so far, and let’s adjust our <code>main</code> function to account for our new data types.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Main.hs</span>
+<span class='kr'>module</span> <span class='nn'>Main</span> <span class='kr'>where</span>
+
+<span class='kr'>import</span> <span class='nn'>Prelude</span> <span class='k'>hiding</span> <span class='p'>(</span><span class='kt'>Either</span><span class='p'>(</span><span class='o'>..</span><span class='p'>))</span>
+<span class='kr'>import</span> <span class='nn'>System.Console.ANSI</span>
+<span class='kr'>import</span> <span class='nn'>System.IO</span>
+
+<span class='kr'>import</span> <span class='nn'>Console</span>
+<span class='kr'>import</span> <span class='nn'>Level</span>
+<span class='kr'>import</span> <span class='nn'>Types</span>
+
+<span class='nf'>main</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>hSetEcho</span> <span class='n'>stdin</span> <span class='kt'>False</span>
+  <span class='n'>hSetBuffering</span> <span class='n'>stdin</span>  <span class='kt'>NoBuffering</span>
+  <span class='n'>hSetBuffering</span> <span class='n'>stdout</span> <span class='kt'>NoBuffering</span>
+  <span class='n'>hideCursor</span>
+  <span class='n'>setTitle</span> <span class='s'>&quot;Thieflike&quot;</span>
+  <span class='n'>clearScreen</span>
+  <span class='kr'>let</span> <span class='n'>world</span> <span class='ow'>=</span> <span class='n'>genesis</span> <span class='p'>{</span> <span class='n'>wLevel</span> <span class='ow'>=</span> <span class='n'>level1</span><span class='p'>,</span> <span class='n'>wLevels</span> <span class='ow'>=</span> <span class='p'>[</span><span class='n'>level1</span><span class='p'>]</span> <span class='p'>}</span>
+  <span class='n'>drawWorld</span> <span class='n'>world</span>
+  <span class='n'>gameLoop</span> <span class='n'>world</span>
+</code></pre></div>
+<p>We only need to draw the whole world once on this iteration of Thieflike, so we do that right before jumping into the gameLoop.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Main.hs</span>
+
+<span class='nf'>gameLoop</span> <span class='n'>world</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>drawHero</span> <span class='n'>world</span>
+  <span class='n'>input</span> <span class='ow'>&lt;-</span> <span class='n'>getInput</span>
+  <span class='kr'>case</span> <span class='n'>input</span> <span class='kr'>of</span>
+    <span class='kt'>Exit</span>    <span class='ow'>-&gt;</span> <span class='n'>handleExit</span>
+    <span class='kt'>Dir</span> <span class='n'>dir</span> <span class='ow'>-&gt;</span> <span class='n'>handleDir</span> <span class='n'>world</span> <span class='n'>dir</span>
+
+
+<span class='nf'>getInput</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>char</span> <span class='ow'>&lt;-</span> <span class='n'>getChar</span>
+  <span class='kr'>case</span> <span class='n'>char</span> <span class='kr'>of</span>
+    <span class='n'>&#39;q&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='kt'>Exit</span>
+    <span class='n'>&#39;w&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='p'>(</span><span class='kt'>Dir</span> <span class='kt'>Up</span><span class='p'>)</span>
+    <span class='n'>&#39;s&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='p'>(</span><span class='kt'>Dir</span> <span class='kt'>Down</span><span class='p'>)</span>
+    <span class='n'>&#39;a&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='p'>(</span><span class='kt'>Dir</span> <span class='kt'>Left</span><span class='p'>)</span>
+    <span class='n'>&#39;d&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='p'>(</span><span class='kt'>Dir</span> <span class='kt'>Right</span><span class='p'>)</span>
+    <span class='kr'>_</span>   <span class='ow'>-&gt;</span> <span class='n'>getInput</span>
+</code></pre></div>
+<p><code>gameLoop</code> and <code>getInput</code> are similar to before, but we account for the fact that <code>Input</code> is either <code>Dir Direction</code> or simply <code>Exit</code>. We also make sure to draw the hero prior to receiving input.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Main.hs</span>
+
+<span class='nf'>handleExit</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>clearScreen</span>
+  <span class='n'>setCursorPosition</span> <span class='mi'>0</span> <span class='mi'>0</span>
+  <span class='n'>showCursor</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span><span class='kt'>Reset</span><span class='p'>]</span>
+  <span class='n'>putStrLn</span> <span class='s'>&quot;Thank you for playing!&quot;</span>
+</code></pre></div>
+<p>I was pointed out in comments to <a href="http://jamiltron.com/2012/07/Code_Us_Some_Roguelike_in_Haskell.html">post 1</a> that I should be calling <code>setSGR [Reset]</code> prior to exiting.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- file: Main.hs</span>
+
+<span class='nf'>dirToCoord</span> <span class='kt'>Up</span>    <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>0</span><span class='p'>,</span> <span class='o'>-</span><span class='mi'>1</span><span class='p'>)</span>
+<span class='nf'>dirToCoord</span> <span class='kt'>Down</span>  <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>0</span><span class='p'>,</span>  <span class='mi'>1</span><span class='p'>)</span>
+<span class='nf'>dirToCoord</span> <span class='kt'>Left</span>  <span class='ow'>=</span> <span class='p'>(</span><span class='o'>-</span><span class='mi'>1</span><span class='p'>,</span> <span class='mi'>0</span><span class='p'>)</span>
+<span class='nf'>dirToCoord</span> <span class='kt'>Right</span> <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>1</span><span class='p'>,</span>  <span class='mi'>0</span><span class='p'>)</span>
+
+
+<span class='nf'>handleDir</span> <span class='n'>w</span> <span class='n'>dir</span>
+  <span class='o'>|</span> <span class='n'>isWall</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='o'>||</span>
+    <span class='n'>isClosedDoor</span> <span class='n'>coord</span> <span class='n'>lvl</span> <span class='ow'>=</span> <span class='n'>gameLoop</span> <span class='n'>w</span> <span class='p'>{</span> <span class='n'>wHero</span> <span class='ow'>=</span> <span class='n'>h</span> <span class='p'>{</span> <span class='n'>hOldPos</span> <span class='ow'>=</span> <span class='n'>hCurrPos</span> <span class='n'>h</span> <span class='p'>}</span> <span class='p'>}</span>
+  <span class='o'>|</span> <span class='n'>otherwise</span>              <span class='ow'>=</span> <span class='n'>gameLoop</span> <span class='n'>w</span> <span class='p'>{</span> <span class='n'>wHero</span> <span class='ow'>=</span> <span class='n'>h</span> <span class='p'>{</span> <span class='n'>hOldPos</span>  <span class='ow'>=</span> <span class='n'>hCurrPos</span> <span class='n'>h</span>
+                                                    <span class='p'>,</span> <span class='n'>hCurrPos</span> <span class='ow'>=</span> <span class='n'>coord</span> <span class='p'>}</span> <span class='p'>}</span>
+  <span class='kr'>where</span> 
+    <span class='n'>h</span>              <span class='ow'>=</span> <span class='n'>wHero</span> <span class='n'>w</span>
+    <span class='n'>lvl</span>            <span class='ow'>=</span> <span class='n'>wLevel</span> <span class='n'>w</span>
+    <span class='n'>coord</span>          <span class='ow'>=</span> <span class='p'>(</span><span class='n'>newX</span><span class='p'>,</span> <span class='n'>newY</span><span class='p'>)</span>
+    <span class='n'>newX</span>           <span class='ow'>=</span> <span class='n'>hConst</span> <span class='n'>heroX</span>
+    <span class='n'>newY</span>           <span class='ow'>=</span> <span class='n'>hConst</span> <span class='n'>heroY</span>
+    <span class='p'>(</span><span class='n'>heroX</span><span class='p'>,</span> <span class='n'>heroY</span><span class='p'>)</span> <span class='ow'>=</span> <span class='n'>hCurrPos</span> <span class='n'>h</span> <span class='o'>|+|</span> <span class='n'>dirToCoord</span> <span class='n'>dir</span>
+    <span class='n'>hConst</span> <span class='n'>i</span>       <span class='ow'>=</span> <span class='n'>max</span> <span class='mi'>0</span> <span class='p'>(</span><span class='n'>min</span> <span class='n'>i</span> <span class='mi'>80</span><span class='p'>)</span>
+
+
+<span class='c1'>-- same as before</span>
+<span class='p'>(</span><span class='o'>|+|</span><span class='p'>)</span> <span class='ow'>::</span> <span class='kt'>Coord</span> <span class='ow'>-&gt;</span> <span class='kt'>Coord</span> <span class='ow'>-&gt;</span> <span class='kt'>Coord</span>
+<span class='p'>(</span><span class='o'>|+|</span><span class='p'>)</span> <span class='p'>(</span><span class='n'>x1</span><span class='p'>,</span> <span class='n'>y1</span><span class='p'>)</span> <span class='p'>(</span><span class='n'>x2</span><span class='p'>,</span> <span class='n'>y2</span><span class='p'>)</span> <span class='ow'>=</span> <span class='p'>(</span><span class='n'>x1</span> <span class='o'>+</span> <span class='n'>x2</span><span class='p'>,</span> <span class='n'>y1</span> <span class='o'>+</span> <span class='n'>y2</span><span class='p'>)</span>
+</code></pre></div>
+<p><code>handleDir</code> check’s the hero’s next position and looks to see if it is a wall or door. If it is - the hero stays put, otherwise the hero gets to move. We’ll add support for collision with all of our objects when we build up the combat system.</p>
+
+<p><br /></p>
+
+<h3 id="finalizing_part_2">Finalizing Part 2</h3>
+
+<p>Now we should be able to compile <code>Main.hs</code> and move our little figure around. The hero should not be able to move through walls or the closed door. This has kind of been a long post, but we got some definitions done early for what the game will become.</p>
+
+<p>Thank you very much for reading, and please leave me any comments you have!</p>
+
+<p>You can find the source to this post <a href="https://github.com/jamiltron/Thieflike/tree/post02">here</a>.</p></div>
+</article><br /><br />
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+</main>
+  <footer>
+    <hr />
+    <p>&copy; <time>2014</time> Justin Hamilton</p>
+  </footer>
+</body>
+</html>

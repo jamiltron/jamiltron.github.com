@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title> Code Us Some Roguelike in Haskell! |  Jamiltron</title>
+<style type="text/css" media="screen">
+@import '/css/reset.css';
+@import '/css/main.css';
+@import '/css/pygments/default.css';
+</style>
+</head>
+
+<body>
+  <header>
+    <h1><a href="/">Jamiltron</a></h1>
+      <h4>Game Design, Programming, and Other Bits</h4>
+      <hr />
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/contact.html">Contact</a></li>
+      <li><a href="/archive.html">Archive</a></li>
+      <li><a href="https://github.com/jamiltron">Github</a></li>
+      <li><a href="https://twitter.com/jamiltron">@jamiltron</a></li>
+      <li><a href="/feed.xml">rss Feed</a></li>
+    </ul>
+  </nav>
+
+  <main><article>
+  <header>
+    <h2>Code Us Some Roguelike in Haskell!</h2>
+    <span class="date"><time datetime="2012-07-10">Jul 10, 2012</time></span>
+    <span class="category"><a href="/game dev/">game dev</a>, <a href="/haskell/">haskell</a>, and <a href="/roguelike/">roguelike</a></span><br/>
+  </header>
+
+  <div class="entry"><h2 class='post_title'>Code Us Some Roguelike in Haskell!</h2>
+<p>I’ve recently been inspired by the great live coding of <a href="http://www.youtube.com/watch?v=mtvoOIsN-GU&feature=youtu.be">Sokoban</a> to put together a console and gui-based <a href="http://en.wikipedia.org/wiki/Roguelike">roguelike</a> in Haskell. There are already some really awesome roguelikes like <a href="https://github.com/kosmikus/LambdaHack">LambdaHack</a>, <a href="http://hackage.haskell.org/package/MazesOfMonad">Mazes of Monad</a>, and <a href="http://roguestar.downstairspeople.org/">Roguestar</a> (I am sorry if I have forgotten any), but I want to implement my own. We’ll call this little game ‘Thieflike.’</p>
+
+<p>I am assuming basic knowledge of Haskell - I’d say through the Monads chapters in either <a href="http://learnyouahaskell.com/">LYAH</a> or <a href="http://book.realworldhaskell.org/">RWH</a>. I may also suggest reading the Monad Transformers chapter in RWH, although we might skip on using a transformer - more about that later.</p>
+
+<p>You need <code>ansi-terminal</code> for this project, which you should be able to grab with <code>cabal install ansi-terminal</code>.</p>
+
+<p>To start this project let’s just get a player character on the screen and get it to move around. We’ll need something to represent the game’s world as well as the hero. For the hero all we need is a tuple of <code>Int</code>s to represent the position, and the world will be a datatype containing the hero. Let’s start a new file named <code>Main.hs</code>, which we’ll use to contain all of our code for this portion of the project.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>--file: Main.hs</span>
+<span class='kr'>module</span> <span class='nn'>Main</span> <span class='kr'>where</span>
+
+<span class='kr'>import</span> <span class='nn'>Prelude</span> <span class='k'>hiding</span> <span class='p'>(</span><span class='kt'>Either</span><span class='p'>(</span><span class='o'>..</span><span class='p'>))</span>
+<span class='kr'>import</span> <span class='nn'>System.Console.ANSI</span>
+<span class='kr'>import</span> <span class='nn'>System.IO</span>
+
+<span class='kr'>type</span> <span class='kt'>Coord</span> <span class='ow'>=</span> <span class='p'>(</span><span class='kt'>Int</span><span class='p'>,</span> <span class='kt'>Int</span><span class='p'>)</span>
+
+<span class='kr'>data</span> <span class='kt'>World</span> <span class='ow'>=</span> <span class='kt'>World</span> <span class='p'>{</span> <span class='n'>wHero</span> <span class='ow'>::</span> <span class='kt'>Coord</span> <span class='p'>}</span>
+</code></pre></div>
+<p>Now let’s put together a main function and show the character, represented with the traditional ‘@’ symbol.</p>
+<div class='highlight'><pre><code class='haskell'><span class='nf'>main</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Blue</span> <span class='p'>]</span>
+  <span class='n'>putStrLn</span> <span class='s'>&quot;@&quot;</span>
+</code></pre></div>
+<p>The <code>setSGR</code> function sets the ANSI Select Graphic Rendition mode, essentially it allows us to do things like set the console foreground and/or background color, the intensity of the color, etc. See the <a href="http://hackage.haskell.org/packages/archive/ansi-terminal/0.5.5/doc/html/System-Console-ANSI.html">haddock</a> for more info.</p>
+
+<p>This is cool that we’ve started using terminal function, but it doesn’t really do anything. We need to handle input and redraw the screen, so let’s add a data type declaration representing current possible inputs, such as moving the hero around or exiting the game.</p>
+<div class='highlight'><pre><code class='haskell'><span class='kr'>data</span> <span class='kt'>Input</span> <span class='ow'>=</span> <span class='kt'>Up</span>
+           <span class='o'>|</span> <span class='kt'>Down</span>
+           <span class='o'>|</span> <span class='kt'>Left</span>
+           <span class='o'>|</span> <span class='kt'>Right</span>
+           <span class='o'>|</span> <span class='kt'>Exit</span>
+           <span class='kr'>deriving</span> <span class='p'>(</span><span class='kt'>Eq</span><span class='p'>)</span>
+</code></pre></div>
+<p>Remember when we hid Either in the Prelude module at the beginning of our file? That’s because our possible inputs of <code>Left</code> and <code>Right</code> conflicts with <code>Either</code>’s data constructors.</p>
+
+<p>Now to write the main loop - we need to handle input and redraw the screen. <code>main</code> must also be rewritten to accommodate changes. We also need to add a few lines to make sure that input and output is not buffered - so the program will accept input without needing the user to press enter, and so that input is not echoed back out.</p>
+<div class='highlight'><pre><code class='haskell'><span class='nf'>main</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>hSetEcho</span> <span class='n'>stdin</span> <span class='kt'>False</span>
+  <span class='n'>hSetBuffering</span> <span class='n'>stdin</span>  <span class='kt'>NoBuffering</span>
+  <span class='n'>hSetBuffering</span> <span class='n'>stdout</span> <span class='kt'>NoBuffering</span>
+  <span class='n'>hideCursor</span>
+  <span class='n'>setTitle</span> <span class='s'>&quot;Thieflike&quot;</span>
+  <span class='n'>gameLoop</span> <span class='o'>$</span> <span class='kt'>World</span> <span class='p'>(</span><span class='mi'>0</span><span class='p'>,</span> <span class='mi'>0</span><span class='p'>)</span>
+
+
+<span class='nf'>gameLoop</span> <span class='n'>world</span><span class='o'>@</span><span class='p'>(</span><span class='kt'>World</span> <span class='n'>hero</span><span class='p'>)</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>drawHero</span> <span class='n'>hero</span>
+  <span class='n'>input</span> <span class='ow'>&lt;-</span> <span class='n'>getInput</span>
+  <span class='kr'>case</span> <span class='n'>input</span> <span class='kr'>of</span>
+    <span class='kt'>Exit</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='nb'>()</span>
+    <span class='kr'>_</span>    <span class='ow'>-&gt;</span> <span class='n'>handleDir</span> <span class='n'>world</span> <span class='n'>input</span>
+
+
+<span class='nf'>drawHero</span> <span class='p'>(</span><span class='n'>heroX</span><span class='p'>,</span> <span class='n'>heroY</span><span class='p'>)</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>clearScreen</span>
+  <span class='n'>setCursorPosition</span> <span class='n'>heroY</span> <span class='n'>heroX</span>
+  <span class='n'>setSGR</span> <span class='p'>[</span> <span class='kt'>SetConsoleIntensity</span> <span class='kt'>BoldIntensity</span>
+         <span class='p'>,</span> <span class='kt'>SetColor</span> <span class='kt'>Foreground</span> <span class='kt'>Vivid</span> <span class='kt'>Blue</span> <span class='p'>]</span>
+  <span class='n'>putStr</span> <span class='s'>&quot;@&quot;</span>
+
+<span class='c1'>-- receive a character and return our Input data structure,</span>
+<span class='c1'>-- recursing on invalid input</span>
+<span class='nf'>getInput</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>char</span> <span class='ow'>&lt;-</span> <span class='n'>getChar</span>
+  <span class='kr'>case</span> <span class='n'>char</span> <span class='kr'>of</span>
+    <span class='n'>&#39;q&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='kt'>Exit</span>
+    <span class='n'>&#39;w&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='kt'>Up</span>
+    <span class='n'>&#39;s&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='kt'>Down</span>
+    <span class='n'>&#39;a&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='kt'>Left</span>
+    <span class='n'>&#39;d&#39;</span> <span class='ow'>-&gt;</span> <span class='n'>return</span> <span class='kt'>Right</span>
+    <span class='kr'>_</span> <span class='ow'>-&gt;</span> <span class='n'>getInput</span>
+
+<span class='c1'>-- given a world and a direction, &#39;adjust&#39; the hero&#39;s position, and loop</span>
+<span class='c1'>-- with our updated hero</span>
+<span class='nf'>handleDir</span> <span class='n'>w</span><span class='o'>@</span><span class='p'>(</span><span class='kt'>World</span> <span class='p'>(</span><span class='n'>heroX</span><span class='p'>,</span> <span class='n'>heroY</span><span class='p'>))</span> <span class='n'>input</span> <span class='ow'>=</span> <span class='n'>gameLoop</span> <span class='o'>$</span> <span class='n'>w</span> <span class='p'>{</span> <span class='n'>wHero</span> <span class='ow'>=</span> <span class='n'>newCoord</span> <span class='p'>}</span>
+  <span class='kr'>where</span> <span class='n'>newCoord</span> <span class='ow'>=</span> <span class='kr'>case</span> <span class='n'>input</span> <span class='kr'>of</span>
+                    <span class='kt'>Up</span>    <span class='ow'>-&gt;</span> <span class='p'>(</span><span class='n'>heroX</span><span class='p'>,</span> <span class='n'>heroY</span> <span class='o'>-</span> <span class='mi'>1</span><span class='p'>)</span>
+                    <span class='kt'>Down</span>  <span class='ow'>-&gt;</span> <span class='p'>(</span><span class='n'>heroX</span><span class='p'>,</span> <span class='n'>heroY</span> <span class='o'>+</span> <span class='mi'>1</span><span class='p'>)</span>
+                    <span class='kt'>Left</span>  <span class='ow'>-&gt;</span> <span class='p'>(</span><span class='n'>heroX</span> <span class='o'>-</span> <span class='mi'>1</span><span class='p'>,</span> <span class='n'>heroY</span><span class='p'>)</span>
+                    <span class='kt'>Right</span> <span class='ow'>-&gt;</span> <span class='p'>(</span><span class='n'>heroX</span> <span class='o'>+</span> <span class='mi'>1</span><span class='p'>,</span> <span class='n'>heroY</span><span class='p'>)</span>
+</code></pre></div>
+<p>Now the hero moves around using the good old-fashioned ‘wasd’, and the player may quit by pressing ‘q’. This mostly does what we want - but what if we start pressing ‘a’ or ‘w’ from the starting position? It may appear that the hero is moving in the opposite direction from where we want. To keep this from happening we need to limit the hero’s movement. In fact, let’s keep the hero in between 0 and 80 in all directions. We should also remove the case section out of <code>handleDir</code>, that way we can apply directions to anything, not just the player.</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- operator to add 2 coordinates together</span>
+<span class='p'>(</span><span class='o'>|+|</span><span class='p'>)</span> <span class='ow'>::</span> <span class='kt'>Coord</span> <span class='ow'>-&gt;</span> <span class='kt'>Coord</span> <span class='ow'>-&gt;</span> <span class='kt'>Coord</span>
+<span class='p'>(</span><span class='o'>|+|</span><span class='p'>)</span> <span class='p'>(</span><span class='n'>x1</span><span class='p'>,</span> <span class='n'>y1</span><span class='p'>)</span> <span class='p'>(</span><span class='n'>x2</span><span class='p'>,</span> <span class='n'>y2</span><span class='p'>)</span> <span class='ow'>=</span> <span class='p'>(</span><span class='n'>x1</span> <span class='o'>+</span> <span class='n'>x2</span><span class='p'>,</span> <span class='n'>y1</span> <span class='o'>+</span> <span class='n'>y2</span><span class='p'>)</span>
+
+
+<span class='nf'>dirToCoord</span> <span class='n'>d</span>
+  <span class='o'>|</span> <span class='n'>d</span> <span class='o'>==</span> <span class='kt'>Up</span>    <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>0</span><span class='p'>,</span> <span class='o'>-</span><span class='mi'>1</span><span class='p'>)</span>
+  <span class='o'>|</span> <span class='n'>d</span> <span class='o'>==</span> <span class='kt'>Down</span>  <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>0</span><span class='p'>,</span>  <span class='mi'>1</span><span class='p'>)</span>
+  <span class='o'>|</span> <span class='n'>d</span> <span class='o'>==</span> <span class='kt'>Left</span>  <span class='ow'>=</span> <span class='p'>(</span><span class='o'>-</span><span class='mi'>1</span><span class='p'>,</span> <span class='mi'>0</span><span class='p'>)</span>
+  <span class='o'>|</span> <span class='n'>d</span> <span class='o'>==</span> <span class='kt'>Right</span> <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>1</span><span class='p'>,</span>  <span class='mi'>0</span><span class='p'>)</span>
+  <span class='o'>|</span> <span class='n'>otherwise</span>  <span class='ow'>=</span> <span class='p'>(</span><span class='mi'>0</span><span class='p'>,</span>  <span class='mi'>0</span><span class='p'>)</span>
+
+
+<span class='c1'>-- add the supplied direction to the hero&#39;s position, and set that</span>
+<span class='c1'>-- to be the hero&#39;s new position, making sure to limit the hero&#39;s</span>
+<span class='c1'>-- position between 0 and 80 in either direction</span>
+<span class='nf'>handleDir</span> <span class='n'>w</span><span class='o'>@</span><span class='p'>(</span><span class='kt'>World</span> <span class='n'>hero</span><span class='p'>)</span> <span class='n'>input</span> <span class='ow'>=</span> <span class='n'>gameLoop</span> <span class='p'>(</span><span class='n'>w</span> <span class='p'>{</span> <span class='n'>wHero</span> <span class='ow'>=</span> <span class='n'>newCoord</span> <span class='p'>})</span>
+  <span class='kr'>where</span> <span class='n'>newCoord</span>       <span class='ow'>=</span> <span class='p'>(</span><span class='n'>newX</span><span class='p'>,</span> <span class='n'>newY</span><span class='p'>)</span>
+        <span class='p'>(</span><span class='n'>heroX</span><span class='p'>,</span> <span class='n'>heroY</span><span class='p'>)</span> <span class='ow'>=</span> <span class='n'>hero</span> <span class='o'>|+|</span> <span class='n'>dirToCoord</span> <span class='n'>input</span>
+        <span class='n'>hConst</span> <span class='n'>i</span>       <span class='ow'>=</span> <span class='n'>max</span> <span class='mi'>0</span> <span class='p'>(</span><span class='n'>min</span> <span class='n'>i</span> <span class='mi'>80</span><span class='p'>)</span>
+        <span class='n'>newX</span>           <span class='ow'>=</span> <span class='n'>hConst</span> <span class='n'>heroX</span>
+        <span class='n'>newY</span>           <span class='ow'>=</span> <span class='n'>hConst</span> <span class='n'>heroY</span>
+</code></pre></div>
+<p>Finally, let’s make sure we say goodbye to the player when they press ‘q’,<br />as well as set the cursor back to being visible:</p>
+<div class='highlight'><pre><code class='haskell'><span class='c1'>-- update the game loop to add in the goodbye message</span>
+<span class='nf'>gameLoop</span> <span class='n'>world</span><span class='o'>@</span><span class='p'>(</span><span class='kt'>World</span> <span class='n'>hero</span><span class='p'>)</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>drawHero</span> <span class='n'>hero</span>
+  <span class='n'>input</span> <span class='ow'>&lt;-</span> <span class='n'>getInput</span>
+  <span class='kr'>case</span> <span class='n'>input</span> <span class='kr'>of</span>
+    <span class='kt'>Exit</span> <span class='ow'>-&gt;</span> <span class='n'>handleExit</span>
+    <span class='kr'>_</span>    <span class='ow'>-&gt;</span> <span class='n'>handleDir</span> <span class='n'>world</span> <span class='n'>input</span>
+
+
+
+<span class='c1'>-- when the user wants to exit we give them a thank you</span>
+<span class='c1'>-- message and then reshow the cursor</span>
+<span class='nf'>handleExit</span> <span class='ow'>=</span> <span class='kr'>do</span>
+  <span class='n'>clearScreen</span>
+  <span class='n'>setCursorPosition</span> <span class='mi'>0</span> <span class='mi'>0</span>
+  <span class='n'>showCursor</span>
+  <span class='n'>putStrLn</span> <span class='s'>&quot;Thank you for playing!&quot;</span>
+</code></pre></div>
+<p>Great, the hero moves around and now we exit a little better than better and we have a goodbye message for the player. This is a small start to our roguelike, but its a good foundation. Next post we’ll work with adding some actual game elements to Thieflike.</p>
+
+<p>The code and an install-able project for this post is located at: <a href="https://github.com/jamiltron/Thieflike/tree/post01">https://github.com/jamiltron/Thieflike/tree/post01</a></p>
+
+<p>Thank you for reading!</p></div>
+</article><br /><br />
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+</main>
+  <footer>
+    <hr />
+    <p>&copy; <time>2014</time> Justin Hamilton</p>
+  </footer>
+</body>
+</html>
