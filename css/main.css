@@ -6,7 +6,7 @@ body {
 }
 
 h1, h2, h3, h4 {
-  font-family: Georgia, serif;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
   width: 100%;
   min-width: 840px;
 }
