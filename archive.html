@@ -1,15 +1,96 @@
----
-layout: page
-title: Archive
----
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title> Archive |  Jamiltron</title>
+<style type="text/css" media="screen">
+@import '/css/reset.css';
+@import '/css/main.css';
+@import '/css/pygments/default.css';
+</style>
+</head>
 
-  {% for post in site.posts %}
+<body>
+  <header>
+    <h1><a href="/">Jamiltron</a></h1>
+      <h4>Game Design, Programming, and Other Bits</h4>
+      <hr />
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/contact.html">Contact</a></li>
+      <li><a href="/archive.html">Archive</a></li>
+      <li><a href="https://github.com/jamiltron">Github</a></li>
+      <li><a href="https://twitter.com/jamiltron">@jamiltron</a></li>
+      <li><a href="/feed.xml">rss Feed</a></li>
+    </ul>
+  </nav>
+
+  <main><div class="post">
+  <h2>Archive</h2>
+  <div class="entry">  
     <article>
       <header>
-        <h3><a href="{{site.baseurl}}{{post.url}}">{{post.title}}</a></h3>
-        <span class="date"><time datetime="{{post.date|date:"%F"}}">{{post.date|date:"%b %d, %Y"}}</time></span>
-        <span class="category">{{post.categories | category_links}}</span><br/>
+        <h3><a href="/2014/03/Updates_and_Global_Game_Jam_2014.html">Updates and Global Game Jam</a></h3>
+        <span class="date"><time datetime="2014-03-09">Mar 09, 2014</time></span>
+        <span class="category"><a href="/game dev/">game dev</a> and <a href="/game jams/">game jams</a></span><br/>
       </header>
-      <div class="entry">{{post.excerpt}}</div>
+      <div class="entry">What I have been up to lately.</div>
     </article>
-  {% endfor %}
+  
+    <article>
+      <header>
+        <h3><a href="/2012/07/Code_Us_Some_Roguelike2.html">Code Us Some Roguelike in Haskell (Part 2)!</a></h3>
+        <span class="date"><time datetime="2012-07-20">Jul 20, 2012</time></span>
+        <span class="category"><a href="/game dev/">game dev</a>, <a href="/haskell/">haskell</a>, and <a href="/roguelike/">roguelike</a></span><br/>
+      </header>
+      <div class="entry">Part 2 of the Roguelike tutorial.</div>
+    </article>
+  
+    <article>
+      <header>
+        <h3><a href="/2012/07/Code_Us_Some_Roguelike_in_Haskell.html">Code Us Some Roguelike in Haskell!</a></h3>
+        <span class="date"><time datetime="2012-07-10">Jul 10, 2012</time></span>
+        <span class="category"><a href="/game dev/">game dev</a>, <a href="/haskell/">haskell</a>, and <a href="/roguelike/">roguelike</a></span><br/>
+      </header>
+      <div class="entry">A fun game project in Haskell.</div>
+    </article>
+  
+    <article>
+      <header>
+        <h3><a href="/2011/11/RIP_John_McCarthy.html">RIP John McCarthy</a></h3>
+        <span class="date"><time datetime="2011-11-07">Nov 07, 2011</time></span>
+        <span class="category"><a href="/computer science/">computer science</a></span><br/>
+      </header>
+      <div class="entry">Another great loss.</div>
+    </article>
+  
+    <article>
+      <header>
+        <h3><a href="/2011/10/RIP_Dennis_Ritchie.html">RIP Dennis Ritchie</a></h3>
+        <span class="date"><time datetime="2011-10-13">Oct 13, 2011</time></span>
+        <span class="category"><a href="/computer science/">computer science</a></span><br/>
+      </header>
+      <div class="entry">Thank you for everything, you will be missed.</div>
+    </article>
+  
+    <article>
+      <header>
+        <h3><a href="/2011/10/moving_blog.html">Moving My Blog to Github</a></h3>
+        <span class="date"><time datetime="2011-10-08">Oct 08, 2011</time></span>
+        <span class="category"><a href="/meta/">meta</a></span><br/>
+      </header>
+      <div class="entry">An update on what's going on and why this is here.</div>
+    </article>
+  
+</div>
+</div>
+</main>
+  <footer>
+    <hr />
+    <p>&copy; <time>2014</time> Justin Hamilton</p>
+  </footer>
+</body>
+</html>

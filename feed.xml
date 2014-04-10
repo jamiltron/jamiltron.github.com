@@ -1,20 +1,717 @@
----
-layout: rss-feed
----
-
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>{{ site.name }}</title>
-    <description>{{ site.description }}</description>
-    <link>{{ site.url }}</link>
-    {% for post in site.posts limit:10 %}
+    <title>Jamiltron</title>
+    <description>Game Design, Programming, and Other Bits</description>
+    <link>http://jamiltron.com</link>
+    
       <item>
-        <title>{{ post.title }}</title>
-        <description>{{ post.content | xml_escape }}</description>
-        <published>{{ post.date }}</published>
-        <link>{{ site.url}}{{ post.url }}</link>
+        <title>Updates and Global Game Jam</title>
+        <description>&lt;h3 id=&quot;long_time_no_updates&quot;&gt;Long Time, No Updates&lt;/h3&gt;
+
+&lt;p&gt;So it’s been a long time since I have updated this and a lot has happened - I moved from Omaha, NE to San Francisco, CA, got a new job, and lots of other things. I thought about giving a short update by posting something I did a few months ago - &lt;a href=&quot;http://globalgamejam.org/&quot;&gt;Global Game Jam&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;global_game_jam&quot;&gt;Global Game Jam&lt;/h3&gt;
+
+&lt;p&gt;Game development has always been a huge hobby of mine, and having moved to San Francisco I was fortunate enough to be able to participate in a huge game jam. I got on an amazing team with a very talented game developer, an awesome computer science student who also had great pixel art skills, and a great artist. The game we came up with is kind of a Gone Home-inspired 2d game written in Unity, you can check it out &lt;a href=&quot;http://globalgamejam.org/2014/games/bread-crumbs&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://globalgamejam.org/2014/games/bread-crumbs&quot;&gt;&lt;img src=&quot;/images/breadcrumbsscreenshot.jpg&quot; alt=&quot;Bread Crumbs&quot; /&gt;&lt;/a&gt;&lt;/p&gt;</description>
+        <published>2014-03-09 00:00:00 +0100</published>
+        <link>http://jamiltron.com/2014/03/Updates_and_Global_Game_Jam_2014.html</link>
       </item>
-    {% endfor %}
+    
+      <item>
+        <title>Code Us Some Roguelike in Haskell (Part 2)!</title>
+        <description>&lt;h2 class='post_title'&gt;Code Us Some Roguelike in Haskell (Part 2)!&lt;/h2&gt;
+&lt;p&gt;This is part 2 of a multi-part tutorial:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://jamiltron.com/2012/07/Code_Us_Some_Roguelike_in_Haskell.html&quot;&gt;Part 1&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;design_decisions&quot;&gt;Design Decisions&lt;/h3&gt;
+
+&lt;p&gt;This post is more focused on what sort of a game we are making. For purposes of this tutorial Thieflike must be relatively small. The idea of roguelikes may be a little different for each person, so I want to go over the things I think needs to be in this game to place it within that genre:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Random dungeons&lt;/li&gt;
+
+&lt;li&gt;Monsters&lt;/li&gt;
+
+&lt;li&gt;Gear &amp;amp; Potions&lt;/li&gt;
+
+&lt;li&gt;Treasure&lt;/li&gt;
+
+&lt;li&gt;Doors and the bashing thereof&lt;/li&gt;
+
+&lt;li&gt;Environmental stuff within the dungeon (pits, traps, etc.)&lt;/li&gt;
+
+&lt;li&gt;Line-of-Sight&lt;/li&gt;
+
+&lt;li&gt;Mapping&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Even with such a small set of features the game could get pretty hairy. Especially since we intend to eventually add support for a graphical front-end beyond the console. How can we keep each of those things in the game, while still keeping it simple?&lt;/p&gt;
+
+&lt;h4 id=&quot;random_dungeons&quot;&gt;Random Dungeons&lt;/h4&gt;
+
+&lt;p&gt;While there are all sorts of awesome ways to randomize each level, we will be sticking to something like the traditional method used in Rogue. This may not produce the snazziest environments around, but it will serve the purpose and prevent our levels from becoming superfluous given the number of elements we are playing with.&lt;/p&gt;
+
+&lt;p&gt;We’ll also be implementing a system for random/wandering monsters and treasure layout similar to the old D&amp;amp;D Red Box, where each room has specific random percentages for oddities.&lt;/p&gt;
+
+&lt;p&gt;Since we’re making our design decision right now we won’t be doing the random dungeon part until next post, this time I’ll be copping out with a pre-created string.&lt;/p&gt;
+
+&lt;h4 id=&quot;monsters&quot;&gt;Monsters&lt;/h4&gt;
+
+&lt;p&gt;This may be blasphemous - but we’ll only have one enemy type, and its strength will be based entirely around how deep within the dungeon it is. We can always add more later, but this will keep complexity down initially.&lt;/p&gt;
+
+&lt;p&gt;Let’s call this monster type ‘villain’, just because I think that’s a funny monster type name. You can call it ‘orc’, or ‘were-gelatinous cube’, or whatever you like.&lt;/p&gt;
+
+&lt;p&gt;Last tutorial we kept all of our data type declarations in Main, but now we’re going to have a ton more. For now let’s break those out into a new file called &lt;code&gt;Types.hs&lt;/code&gt; in the same directory as &lt;code&gt;Main.hs&lt;/code&gt;&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;--file: Types.hs&lt;/span&gt;
+&lt;span class='kr'&gt;module&lt;/span&gt; &lt;span class='nn'&gt;Types&lt;/span&gt; &lt;span class='kr'&gt;where&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='k'&gt;qualified&lt;/span&gt; &lt;span class='nn'&gt;Data.Map&lt;/span&gt; &lt;span class='k'&gt;as&lt;/span&gt; &lt;span class='n'&gt;M&lt;/span&gt;
+
+&lt;span class='kr'&gt;type&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Int&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+&lt;span class='c1'&gt;-- foul beasts&lt;/span&gt;
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Villain&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Villain&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;vCurrPos&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt;
+                       &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;vGold&lt;/span&gt;    &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;
+                       &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;vHP&lt;/span&gt;      &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;
+                       &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;vItems&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='kt'&gt;Item&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+                       &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;vOldPos&lt;/span&gt;  &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We move &lt;code&gt;Coord&lt;/code&gt; from &lt;code&gt;Main.hs&lt;/code&gt; into &lt;code&gt;Types.hs&lt;/code&gt; and we import &lt;code&gt;Data.Map&lt;/code&gt;, because a lot of our data will be stored in a map. There are many name clashes in a lot of the &lt;code&gt;Data.*&lt;/code&gt; libraries, so I always like to qualify the import as the first letter of the primary data type provided.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;vCurrPos&lt;/code&gt; and &lt;code&gt;vOldPos&lt;/code&gt; are coordinates to where the villain is currently, and where they were last turn. We’ll be using this to make sure we only draw positions on screen that have actually changed. The other attributes are obvious monster stuff - how many hit points a creature has left, what gold its carrying, and what items it possesses…which leads us to our next point.&lt;/p&gt;
+
+&lt;h4 id=&quot;gear&quot;&gt;Gear&lt;/h4&gt;
+
+&lt;p&gt;The only gear that is essential for me is weapons, potions, and armor. Since we aren’t including a leveling or skill system, the gear a hero finds will kind of be progress, assuming the deeper the dungeon level is the better its gear is.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Types.hs&lt;/span&gt;
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Item&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Arm&lt;/span&gt; &lt;span class='kt'&gt;Armor&lt;/span&gt;
+          &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Pot&lt;/span&gt; &lt;span class='kt'&gt;Potion&lt;/span&gt;
+          &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Weap&lt;/span&gt; &lt;span class='kt'&gt;Weapon&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Armor&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Armor&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;aDefense&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;aDest&lt;/span&gt;    &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;String&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Potion&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Potion&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;pAmount&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;
+                     &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;pDesc&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;String&lt;/span&gt;
+                     &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;pEffect&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Effect&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Effect&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Harm&lt;/span&gt;
+            &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Heal&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Weapon&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Weapon&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wDamage&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;
+                     &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wDesc&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;String&lt;/span&gt;
+                     &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wToHit&lt;/span&gt;  &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Most of the item attributes will become more obvious when we begin putting together the combat system.&lt;/p&gt;
+
+&lt;h4 id=&quot;treasure&quot;&gt;Treasure&lt;/h4&gt;
+
+&lt;p&gt;Just like monsters, there will be only one form of currency laid out throughout the dungeon - gold. It also won’t really do anything other than provide a score system.&lt;/p&gt;
+
+&lt;h4 id=&quot;environmental_stuff&quot;&gt;Environmental Stuff&lt;/h4&gt;
+
+&lt;p&gt;Most of the things that can’t be fought/picked-up will be represented as tiles - stairs, doors, etc. To keep down on what we need to program we won’t be implementing traps, but we should have at least one damaging environmental hazard - let’s put in giant pools of acid.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Types.hs&lt;/span&gt;
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Tile&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Acid&lt;/span&gt;
+          &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Dr&lt;/span&gt;   &lt;span class='kt'&gt;Door&lt;/span&gt;
+          &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;St&lt;/span&gt;   &lt;span class='kt'&gt;Stairs&lt;/span&gt;
+          &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Wall&lt;/span&gt; 
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Door&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Closed&lt;/span&gt;
+          &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Open&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Stairs&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Downstairs&lt;/span&gt;
+            &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Upstairs&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&quot;lineofsight_and_mapping&quot;&gt;Line-of-Sight and Mapping&lt;/h4&gt;
+
+&lt;p&gt;We’ll implement mapping by keeping a dictionary of coordinates with a &lt;code&gt;Bool&lt;/code&gt; of whether or not the space has been mapped before. Line-of-sight will be discussed in a later post.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;wrapping_up_types&quot;&gt;Wrapping up Types&lt;/h3&gt;
+
+&lt;p&gt;We still need to move our Hero, Input and World declaration from &lt;code&gt;Main.hs&lt;/code&gt; to &lt;code&gt;Types.hs&lt;/code&gt;. We also need to set up a data type to represent the level.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Types.hs&lt;/span&gt;
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Input&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Dir&lt;/span&gt; &lt;span class='kt'&gt;Direction&lt;/span&gt;
+           &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Exit&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Direction&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Up&lt;/span&gt;
+               &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Down&lt;/span&gt;
+               &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Left&lt;/span&gt;
+               &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Right&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Hero&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Hero&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt;   
+                 &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hGold&lt;/span&gt;    &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;    
+                 &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hHP&lt;/span&gt;      &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;    
+                 &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hItems&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='kt'&gt;Item&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; 
+                 &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hOldPos&lt;/span&gt;  &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt;  
+                 &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hWield&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Weapon&lt;/span&gt; 
+                 &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hWears&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Armor&lt;/span&gt;  &lt;span class='p'&gt;}&lt;/span&gt;
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Level&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Level&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lDepth&lt;/span&gt;    &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;                   
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lGold&lt;/span&gt;     &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='kt'&gt;Map&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;  
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lItems&lt;/span&gt;    &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='kt'&gt;Map&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='kt'&gt;Item&lt;/span&gt; 
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lMapped&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='kt'&gt;Map&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='kt'&gt;Bool&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lMax&lt;/span&gt;      &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt;            
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt;    &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='kt'&gt;Map&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='kt'&gt;Tile&lt;/span&gt; 
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lVillains&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='kt'&gt;Map&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='kt'&gt;Villain&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt; 
+
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wDepth&lt;/span&gt;  &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt;   &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Hero&lt;/span&gt;     
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wLevel&lt;/span&gt;  &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Level&lt;/span&gt;    
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wLevels&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='kt'&gt;Level&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The Hero is pretty straightforward - similar to the villain except the Hero can wield weapons and wear armor.&lt;/p&gt;
+
+&lt;p&gt;Level needs some explaining. Now, I’m not saying I’m an expert roguelike or game developer and I’m not saying this is necessarily the best way to represent a world, but it certainly works. &lt;code&gt;lDepth&lt;/code&gt; says how deep in the dungeon this particular level is, and &lt;code&gt;lMax&lt;/code&gt; is the largest (x,y) coordinate for the level. Every other attribute is a mapping from coords to a representative type.&lt;/p&gt;
+
+&lt;p&gt;To get the game up and running we need to come up with some defaults data structures. I’ll be cheating a little on the default level and the hero’s position, but we’ll fix that when we generate random worlds.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Types.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;emptyLevel&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Level&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lDepth&lt;/span&gt;    &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lGold&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;empty&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lItems&lt;/span&gt;    &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;empty&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lMapped&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;fromList&lt;/span&gt; &lt;span class='p'&gt;[((&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;),&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;&lt;span class='p'&gt;)]&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lMax&lt;/span&gt;      &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;  
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt;    &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;empty&lt;/span&gt;
+                   &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;lVillains&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;empty&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+
+
+&lt;span class='c1'&gt;-- bare fists/no weapon&lt;/span&gt;
+&lt;span class='nf'&gt;fists&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Weapon&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Bare fists&amp;quot;&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;
+
+
+&lt;span class='c1'&gt;-- no armor&lt;/span&gt;
+&lt;span class='nf'&gt;rags&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Armor&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Rags&amp;quot;&lt;/span&gt;
+
+
+&lt;span class='c1'&gt;-- a basic world used to start the game&lt;/span&gt;
+&lt;span class='nf'&gt;genesis&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wDepth&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;
+           &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;commoner&lt;/span&gt;  
+           &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wLevel&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;emptyLevel&lt;/span&gt;
+           &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wLevels&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='n'&gt;emptyLevel&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;  &lt;span class='c1'&gt;-- all levels&lt;/span&gt;
+
+
+&lt;span class='c1'&gt;-- a basic hero&lt;/span&gt;
+&lt;span class='nf'&gt;commoner&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Hero&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+                &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hGold&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;  
+                &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hHP&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='mi'&gt;10&lt;/span&gt; 
+                &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hItems&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;[]&lt;/span&gt; 
+                &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hOldPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+                &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hWeild&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;fists&lt;/span&gt;
+                &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hWears&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;rags&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;building_a_test_level&quot;&gt;Building a Test Level&lt;/h3&gt;
+
+&lt;p&gt;If we’re going to build a small test level we’re going to need a couple functions to help out. Open a new file and call it &lt;code&gt;Level.hs&lt;/code&gt;. Usual imports here:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Level.hs&lt;/span&gt;
+&lt;span class='kr'&gt;module&lt;/span&gt; &lt;span class='nn'&gt;Level&lt;/span&gt; &lt;span class='kr'&gt;where&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='k'&gt;qualified&lt;/span&gt; &lt;span class='nn'&gt;Data.Map&lt;/span&gt;  &lt;span class='k'&gt;as&lt;/span&gt; &lt;span class='n'&gt;M&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Types&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The initial level will be given to us as a string, so we’ll need to translate characters into our maps.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Level.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;strsToLevel&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='kt'&gt;String&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;Level&lt;/span&gt;
+&lt;span class='nf'&gt;strsToLevel&lt;/span&gt; &lt;span class='n'&gt;str&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;foldl&lt;/span&gt; &lt;span class='n'&gt;populate&lt;/span&gt; &lt;span class='n'&gt;emptyLevel&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt;&lt;span class='n'&gt;lMax&lt;/span&gt;&lt;span class='ow'&gt;=&lt;/span&gt;&lt;span class='n'&gt;maxXY&lt;/span&gt;&lt;span class='p'&gt;}&lt;/span&gt; &lt;span class='n'&gt;asciiMap&lt;/span&gt;
+  &lt;span class='kr'&gt;where&lt;/span&gt;
+    &lt;span class='n'&gt;asciiMap&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;concat&lt;/span&gt; &lt;span class='o'&gt;$&lt;/span&gt; &lt;span class='n'&gt;zipWith&lt;/span&gt; &lt;span class='n'&gt;zip&lt;/span&gt; &lt;span class='n'&gt;coords&lt;/span&gt; &lt;span class='n'&gt;str&lt;/span&gt;
+    &lt;span class='n'&gt;coords&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;[[(&lt;/span&gt;&lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='o'&gt;..&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='o'&gt;..&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt;
+    &lt;span class='n'&gt;maxX&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;maximum&lt;/span&gt; &lt;span class='o'&gt;.&lt;/span&gt; &lt;span class='n'&gt;map&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;fst&lt;/span&gt; &lt;span class='o'&gt;.&lt;/span&gt; &lt;span class='n'&gt;fst&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;$&lt;/span&gt; &lt;span class='n'&gt;asciiMap&lt;/span&gt;
+    &lt;span class='n'&gt;maxY&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;maximum&lt;/span&gt; &lt;span class='o'&gt;.&lt;/span&gt; &lt;span class='n'&gt;map&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;snd&lt;/span&gt; &lt;span class='o'&gt;.&lt;/span&gt; &lt;span class='n'&gt;fst&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='o'&gt;$&lt;/span&gt; &lt;span class='n'&gt;asciiMap&lt;/span&gt;
+    &lt;span class='n'&gt;maxXY&lt;/span&gt;    &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;maxX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;maxY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;populate&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;coord&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;tile&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt;
+      &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;tile&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+        &lt;span class='sc'&gt;&amp;#39;#&amp;#39;&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;insert&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='kt'&gt;Wall&lt;/span&gt;            &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+        &lt;span class='sc'&gt;&amp;#39;&amp;gt;&amp;#39;&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;insert&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;St&lt;/span&gt; &lt;span class='kt'&gt;Downstairs&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+        &lt;span class='sc'&gt;&amp;#39;&amp;lt;&amp;#39;&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;insert&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;St&lt;/span&gt; &lt;span class='kt'&gt;Upstairs&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;   &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+        &lt;span class='sc'&gt;&amp;#39;+&amp;#39;&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;insert&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dr&lt;/span&gt; &lt;span class='kt'&gt;Closed&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;     &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+        &lt;span class='sc'&gt;&amp;#39;-&amp;#39;&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;insert&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dr&lt;/span&gt; &lt;span class='kt'&gt;Open&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;       &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+        &lt;span class='sc'&gt;&amp;#39;~&amp;#39;&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;insert&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='kt'&gt;Acid&lt;/span&gt;            &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+        &lt;span class='kr'&gt;_&lt;/span&gt;     &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;
+        &lt;span class='kr'&gt;where&lt;/span&gt; &lt;span class='n'&gt;t&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Most of this function is shorthand , let’s take a look at it piece by piece.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;asciiMap&lt;/code&gt; is a list of tuples with a &lt;code&gt;Coord&lt;/code&gt; as the first element, and a character from the string as the second. The types here are important to understand what’s going on. &lt;code&gt;zipWith :: (a -&amp;gt; b -&amp;gt; c) -&amp;gt; [a] -&amp;gt; [b] -&amp;gt; [c]&lt;/code&gt;, &lt;code&gt;zip :: [a] -&amp;gt; [b] -&amp;gt; [(a, b)]&lt;/code&gt;, &lt;code&gt;coords&lt;/code&gt; is &lt;i&gt;basically&lt;/i&gt; &lt;code&gt;[[Coord]]&lt;/code&gt; and &lt;code&gt;str :: [String]&lt;/code&gt;. So &lt;code&gt;zip&lt;/code&gt; is &lt;code&gt;zipWith&lt;/code&gt;’s &lt;code&gt;(a -&amp;gt; b -&amp;gt; c)&lt;/code&gt;, &lt;code&gt;[[Coord]]&lt;/code&gt; is &lt;code&gt;zip&lt;/code&gt;’s &lt;code&gt;[[a]]&lt;/code&gt;, etc.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;coords&lt;/code&gt; may seem confusing if you’re coming from a language that doesn’t support lazy lists. It is in fact a a list of lists, where the first element is a list of &lt;i&gt;basically&lt;/i&gt; &lt;code&gt;Coords&lt;/code&gt;, all with &lt;code&gt;y&lt;/code&gt; bound to &lt;code&gt;0&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt; bound to &lt;code&gt;[0..infinity]&lt;/code&gt;. Each additional element binds &lt;code&gt;y&lt;/code&gt; to successively greater values. In a nutshell, this is building a list of infinite coordinates, where each element represents a row with an infinite number of columns. Fortunately &lt;code&gt;zip&lt;/code&gt; tangles our problem of infinity - it only ties as many elements to each actual row as there are available in &lt;code&gt;str&lt;/code&gt;. By &lt;code&gt;zipWith&lt;/code&gt;ing &lt;code&gt;zip&lt;/code&gt; we’re able to combine each coord to its corresponding character in char, but we have one problem left over - they are all one list too deep. Fortunately &lt;code&gt;concat&lt;/code&gt; solves this for us. &lt;code&gt;concat :: [[a]] -&amp;gt; [a]&lt;/code&gt; ‘flattens’ a list of lists one-level.&lt;/p&gt;
+
+&lt;p&gt;If this doesn’t make much sense at first I’d suggest playing around with functions like &lt;code&gt;zip&lt;/code&gt; and &lt;code&gt;zipWith&lt;/code&gt;. They are immensely useful, along with functions like the &lt;code&gt;fold&lt;/code&gt;s and &lt;code&gt;scan&lt;/code&gt;s for manipulating sequences functionally and elegantly where one may have thought required some sort of an iterative loop. In this case its easy to keep &lt;code&gt;coords&lt;/code&gt; contained in &lt;code&gt;strsToLevel&lt;/code&gt; because that’s the only place its going to be used, but when crafting your own sequencing functions if you find them difficult you may want to break them out into their own top-level functions so you can check the types easier with either GHC or GHCi.&lt;/p&gt;
+
+&lt;p&gt;After building up our &lt;code&gt;asciiMap&lt;/code&gt; we &lt;code&gt;foldl&lt;/code&gt; an empty level (plus calculated max value based on the dimensions of &lt;code&gt;str&lt;/code&gt;) over a function we’re calling &lt;code&gt;populate&lt;/code&gt;. So we take our level, consume the next character in &lt;code&gt;asciiMap&lt;/code&gt;, and return a new level for further folding (if there are any chars left). &lt;code&gt;populate&lt;/code&gt; looks for specific characters and inserts them into the level being returned.&lt;/p&gt;
+
+&lt;p&gt;Another set of functions we’re going to need is determining if a particular &lt;code&gt;Coord&lt;/code&gt; is one of our dungeon features or not. Fortunately because our game is so simple we can basically just set functions like &lt;code&gt;isGold&lt;/code&gt; to be &lt;code&gt;Data.Map&lt;/code&gt;’s &lt;code&gt;member&lt;/code&gt; function for a given level’s &lt;code&gt;lGold&lt;/code&gt; map. There are a few cases where we do have to perform a &lt;code&gt;lookup&lt;/code&gt; on our maps, such as with &lt;code&gt;Item&lt;/code&gt;s and &lt;code&gt;Tile&lt;/code&gt;s, because we support multiple types within those corresponding dictionaries.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Level.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;isAcid&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='kt'&gt;Acid&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;         &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isClosedDoor&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dr&lt;/span&gt; &lt;span class='kt'&gt;Closed&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;                &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isOpenDoor&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dr&lt;/span&gt; &lt;span class='kt'&gt;Open&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;              &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isWall&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='kt'&gt;Wall&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;         &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isDownstairs&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;St&lt;/span&gt; &lt;span class='kt'&gt;Downstairs&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;                    &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isUpstairs&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lTiles&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;St&lt;/span&gt; &lt;span class='kt'&gt;Upstairs&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;                  &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isGold&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;member&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lGold&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isVillain&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;member&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lVillains&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isArmor&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lItems&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Arm&lt;/span&gt; &lt;span class='kr'&gt;_&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;            &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isPotion&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lItems&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Pot&lt;/span&gt; &lt;span class='kr'&gt;_&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;            &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;isWeapon&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='kt'&gt;M&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;lookup&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;lItems&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+  &lt;span class='kt'&gt;Just&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Weap&lt;/span&gt; &lt;span class='kr'&gt;_&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;True&lt;/span&gt;
+  &lt;span class='kr'&gt;_&lt;/span&gt;             &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And finally finishing up level for now we’ll construct a ‘cheater’ level until we get the random dungeon generator up and running.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Level.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;map1&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;##############&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;#&amp;gt;           #          ######&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;#            ############    #&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;#            -          +    #&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;#    ~~      ############    #&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;#     ~~     #          #    #&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;#      ~~    #          # &amp;lt;  #&amp;quot;&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;##############          ######&amp;quot;&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+            
+
+&lt;span class='nf'&gt;level1&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;strsToLevel&lt;/span&gt; &lt;span class='n'&gt;map1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I’ve never quite been a fan of how hallways are typically represented in roguelikes, so they’ll just look like really long rooms.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;graphics&quot;&gt;Graphics&lt;/h3&gt;
+
+&lt;p&gt;While we’re handling breaking level out into its own file, let’s break out all of the drawing into one file. We’ll call it &lt;code&gt;Console.hs&lt;/code&gt;, because we eventually want to make a GUI front-end as well.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Console.hs&lt;/span&gt;
+
+&lt;span class='kr'&gt;module&lt;/span&gt; &lt;span class='nn'&gt;Console&lt;/span&gt; &lt;span class='kr'&gt;where&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;System.Console.ANSI&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Level&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Types&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;coordToChar&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='kr'&gt;_&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='kr'&gt;_&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt;      &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;@&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isAcid&lt;/span&gt;        &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;~&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isClosedDoor&lt;/span&gt;  &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isOpenDoor&lt;/span&gt;    &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;-&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isDownstairs&lt;/span&gt;  &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&amp;lt;&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isGold&lt;/span&gt;        &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;$&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isPotion&lt;/span&gt;      &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;!&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isUpstairs&lt;/span&gt;    &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&amp;gt;&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isVillain&lt;/span&gt;     &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;&amp;#39;v&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isWall&lt;/span&gt;        &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;#&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isWeapon&lt;/span&gt;      &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;)&amp;#39;&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;otherwise&lt;/span&gt;                   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39; &amp;#39;&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;@&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Blue&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;@&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;#&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Black&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt;  &lt;span class='sc'&gt;&amp;#39;#&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;!&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Magenta&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;!&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Yellow&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;$&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='n'&gt;&amp;#39;v&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Red&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='n'&gt;&amp;#39;v&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;)&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Cyan&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;)&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&amp;gt;&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Dull&lt;/span&gt; &lt;span class='kt'&gt;Blue&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&amp;gt;&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&amp;lt;&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Dull&lt;/span&gt; &lt;span class='kt'&gt;Cyan&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&amp;lt;&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&lt;/span&gt;&lt;span class='se'&gt;\n&lt;/span&gt;&lt;span class='sc'&gt;&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;&lt;/span&gt;&lt;span class='se'&gt;\n&lt;/span&gt;&lt;span class='sc'&gt;&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;+&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;NormalIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Dull&lt;/span&gt; &lt;span class='kt'&gt;Magenta&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;+&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;-&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;NormalIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Dull&lt;/span&gt; &lt;span class='kt'&gt;Yellow&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;-&amp;#39;&lt;/span&gt;
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;~&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Green&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39;~&amp;#39;&lt;/span&gt;  
+&lt;span class='nf'&gt;drawChar&lt;/span&gt; &lt;span class='kr'&gt;_&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Black&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putChar&lt;/span&gt; &lt;span class='sc'&gt;&amp;#39; &amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Those functions should be pretty straight forward, go ahead and change the colors and intensities to whatever you wish. Now let’s remove the various draw functions from &lt;code&gt;Main.hs&lt;/code&gt; and make new versions of them.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Console.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;drawCoord&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;uncurry&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;flip&lt;/span&gt; &lt;span class='n'&gt;setCursorPosition&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt;
+  &lt;span class='n'&gt;drawChar&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;coordToChar&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; 
+  
+  
+&lt;span class='nf'&gt;drawHero&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;newPos&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='n'&gt;oldPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='nb'&gt;()&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;otherwise&lt;/span&gt;        &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+    &lt;span class='n'&gt;drawCoord&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='n'&gt;newPos&lt;/span&gt;
+    &lt;span class='n'&gt;drawCoord&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='n'&gt;oldPos&lt;/span&gt;
+  &lt;span class='kr'&gt;where&lt;/span&gt;
+    &lt;span class='n'&gt;hero&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;
+    &lt;span class='n'&gt;newPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt;
+    &lt;span class='n'&gt;oldPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hOldPos&lt;/span&gt;  &lt;span class='n'&gt;hero&lt;/span&gt;
+  
+
+&lt;span class='nf'&gt;drawWorld&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setCursorPosition&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;
+  &lt;span class='n'&gt;mapM_&lt;/span&gt; &lt;span class='n'&gt;drawChar&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;unlines&lt;/span&gt; &lt;span class='n'&gt;chars&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+  &lt;span class='kr'&gt;where&lt;/span&gt;
+    &lt;span class='n'&gt;lvl&lt;/span&gt;     &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;wLevel&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='n'&gt;y&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;lMax&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt;
+    &lt;span class='n'&gt;chars&lt;/span&gt;   &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;[[&lt;/span&gt;&lt;span class='n'&gt;coordToChar&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='n'&gt;y&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;x&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='o'&gt;..&lt;/span&gt;&lt;span class='n'&gt;x&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt;
+                                        &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;y&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='o'&gt;..&lt;/span&gt;&lt;span class='n'&gt;y&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;]]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;drawCoord&lt;/code&gt; does something a little funky - I should have mentioned in my first post that while our &lt;code&gt;Coord&lt;/code&gt;s are &lt;code&gt;(x, y)&lt;/code&gt;, &lt;code&gt;setCursorPosition&lt;/code&gt; is looking for input in the style of &lt;code&gt;y -&amp;gt; x&lt;/code&gt;. So we &lt;code&gt;flip&lt;/code&gt; that function to get it to accept &lt;code&gt;x&lt;/code&gt; first, and then we &lt;code&gt;uncurry&lt;/code&gt; it. That transforms it from being a normal curried function into being a function that will accept our &lt;code&gt;Coord&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;drawHero&lt;/code&gt; is pretty obvious, we just make sure to redraw the coord that the hero was previously on, and then draw the position of the hero as it is currently. This will keep our draws down.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;drawWorld&lt;/code&gt; is only intended to be drawn every so often. It sets the cursor to the top-left of the screen, and then it draws all the characters from left to right, top to bottom. We use the same infinite list of list of coords that we did in &lt;code&gt;strsToLevel&lt;/code&gt;, and we &lt;code&gt;unlines&lt;/code&gt; it to intersperse newlines inbetween each row so that we don’t get one long line of every character on the map.&lt;/p&gt;
+
+&lt;p&gt;That does it for &lt;code&gt;Console.hs&lt;/code&gt;, let’s get &lt;code&gt;Main.hs&lt;/code&gt; done and get to playing. Or rather, get to moving a guy around a map, but at least we got most of the foundation for the game pretty much down!&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;main&quot;&gt;Main&lt;/h3&gt;
+
+&lt;p&gt;Start out by importing everything we’ve done so far, and let’s adjust our &lt;code&gt;main&lt;/code&gt; function to account for our new data types.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Main.hs&lt;/span&gt;
+&lt;span class='kr'&gt;module&lt;/span&gt; &lt;span class='nn'&gt;Main&lt;/span&gt; &lt;span class='kr'&gt;where&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Prelude&lt;/span&gt; &lt;span class='k'&gt;hiding&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Either&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;..&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;System.Console.ANSI&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;System.IO&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Console&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Level&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Types&lt;/span&gt;
+
+&lt;span class='nf'&gt;main&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;hSetEcho&lt;/span&gt; &lt;span class='n'&gt;stdin&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+  &lt;span class='n'&gt;hSetBuffering&lt;/span&gt; &lt;span class='n'&gt;stdin&lt;/span&gt;  &lt;span class='kt'&gt;NoBuffering&lt;/span&gt;
+  &lt;span class='n'&gt;hSetBuffering&lt;/span&gt; &lt;span class='n'&gt;stdout&lt;/span&gt; &lt;span class='kt'&gt;NoBuffering&lt;/span&gt;
+  &lt;span class='n'&gt;hideCursor&lt;/span&gt;
+  &lt;span class='n'&gt;setTitle&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Thieflike&amp;quot;&lt;/span&gt;
+  &lt;span class='n'&gt;clearScreen&lt;/span&gt;
+  &lt;span class='kr'&gt;let&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;genesis&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wLevel&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;level1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;wLevels&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='n'&gt;level1&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+  &lt;span class='n'&gt;drawWorld&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;
+  &lt;span class='n'&gt;gameLoop&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We only need to draw the whole world once on this iteration of Thieflike, so we do that right before jumping into the gameLoop.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Main.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;gameLoop&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;drawHero&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;
+  &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='n'&gt;getInput&lt;/span&gt;
+  &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+    &lt;span class='kt'&gt;Exit&lt;/span&gt;    &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;handleExit&lt;/span&gt;
+    &lt;span class='kt'&gt;Dir&lt;/span&gt; &lt;span class='n'&gt;dir&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;handleDir&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='n'&gt;dir&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;getInput&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;char&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='n'&gt;getChar&lt;/span&gt;
+  &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;char&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;q&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='kt'&gt;Exit&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;w&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dir&lt;/span&gt; &lt;span class='kt'&gt;Up&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;s&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dir&lt;/span&gt; &lt;span class='kt'&gt;Down&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;a&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dir&lt;/span&gt; &lt;span class='kt'&gt;Left&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;d&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Dir&lt;/span&gt; &lt;span class='kt'&gt;Right&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='kr'&gt;_&lt;/span&gt;   &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;getInput&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;gameLoop&lt;/code&gt; and &lt;code&gt;getInput&lt;/code&gt; are similar to before, but we account for the fact that &lt;code&gt;Input&lt;/code&gt; is either &lt;code&gt;Dir Direction&lt;/code&gt; or simply &lt;code&gt;Exit&lt;/code&gt;. We also make sure to draw the hero prior to receiving input.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Main.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;handleExit&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;clearScreen&lt;/span&gt;
+  &lt;span class='n'&gt;setCursorPosition&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;
+  &lt;span class='n'&gt;showCursor&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='kt'&gt;Reset&lt;/span&gt;&lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putStrLn&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Thank you for playing!&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I was pointed out in comments to &lt;a href=&quot;http://jamiltron.com/2012/07/Code_Us_Some_Roguelike_in_Haskell.html&quot;&gt;post 1&lt;/a&gt; that I should be calling &lt;code&gt;setSGR [Reset]&lt;/code&gt; prior to exiting.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- file: Main.hs&lt;/span&gt;
+
+&lt;span class='nf'&gt;dirToCoord&lt;/span&gt; &lt;span class='kt'&gt;Up&lt;/span&gt;    &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='nf'&gt;dirToCoord&lt;/span&gt; &lt;span class='kt'&gt;Down&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;  &lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='nf'&gt;dirToCoord&lt;/span&gt; &lt;span class='kt'&gt;Left&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;-&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;span class='nf'&gt;dirToCoord&lt;/span&gt; &lt;span class='kt'&gt;Right&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;  &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;handleDir&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt; &lt;span class='n'&gt;dir&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;isWall&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='o'&gt;||&lt;/span&gt;
+    &lt;span class='n'&gt;isClosedDoor&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='n'&gt;lvl&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;gameLoop&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;h&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;hOldPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='n'&gt;h&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;otherwise&lt;/span&gt;              &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;gameLoop&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;h&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;hOldPos&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='n'&gt;h&lt;/span&gt;
+                                                    &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;coord&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+  &lt;span class='kr'&gt;where&lt;/span&gt; 
+    &lt;span class='n'&gt;h&lt;/span&gt;              &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt;
+    &lt;span class='n'&gt;lvl&lt;/span&gt;            &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;wLevel&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt;
+    &lt;span class='n'&gt;coord&lt;/span&gt;          &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;newX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;newY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='n'&gt;newX&lt;/span&gt;           &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hConst&lt;/span&gt; &lt;span class='n'&gt;heroX&lt;/span&gt;
+    &lt;span class='n'&gt;newY&lt;/span&gt;           &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hConst&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;
+    &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hCurrPos&lt;/span&gt; &lt;span class='n'&gt;h&lt;/span&gt; &lt;span class='o'&gt;|+|&lt;/span&gt; &lt;span class='n'&gt;dirToCoord&lt;/span&gt; &lt;span class='n'&gt;dir&lt;/span&gt;
+    &lt;span class='n'&gt;hConst&lt;/span&gt; &lt;span class='n'&gt;i&lt;/span&gt;       &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;max&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;min&lt;/span&gt; &lt;span class='n'&gt;i&lt;/span&gt; &lt;span class='mi'&gt;80&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='c1'&gt;-- same as before&lt;/span&gt;
+&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;|+|&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt;
+&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;|+|&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x2&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y2&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x1&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='n'&gt;x2&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y1&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='n'&gt;y2&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;handleDir&lt;/code&gt; check’s the hero’s next position and looks to see if it is a wall or door. If it is - the hero stays put, otherwise the hero gets to move. We’ll add support for collision with all of our objects when we build up the combat system.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;finalizing_part_2&quot;&gt;Finalizing Part 2&lt;/h3&gt;
+
+&lt;p&gt;Now we should be able to compile &lt;code&gt;Main.hs&lt;/code&gt; and move our little figure around. The hero should not be able to move through walls or the closed door. This has kind of been a long post, but we got some definitions done early for what the game will become.&lt;/p&gt;
+
+&lt;p&gt;Thank you very much for reading, and please leave me any comments you have!&lt;/p&gt;
+
+&lt;p&gt;You can find the source to this post &lt;a href=&quot;https://github.com/jamiltron/Thieflike/tree/post02&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</description>
+        <published>2012-07-20 00:00:00 +0200</published>
+        <link>http://jamiltron.com/2012/07/Code_Us_Some_Roguelike2.html</link>
+      </item>
+    
+      <item>
+        <title>Code Us Some Roguelike in Haskell!</title>
+        <description>&lt;h2 class='post_title'&gt;Code Us Some Roguelike in Haskell!&lt;/h2&gt;
+&lt;p&gt;I’ve recently been inspired by the great live coding of &lt;a href=&quot;http://www.youtube.com/watch?v=mtvoOIsN-GU&amp;feature=youtu.be&quot;&gt;Sokoban&lt;/a&gt; to put together a console and gui-based &lt;a href=&quot;http://en.wikipedia.org/wiki/Roguelike&quot;&gt;roguelike&lt;/a&gt; in Haskell. There are already some really awesome roguelikes like &lt;a href=&quot;https://github.com/kosmikus/LambdaHack&quot;&gt;LambdaHack&lt;/a&gt;, &lt;a href=&quot;http://hackage.haskell.org/package/MazesOfMonad&quot;&gt;Mazes of Monad&lt;/a&gt;, and &lt;a href=&quot;http://roguestar.downstairspeople.org/&quot;&gt;Roguestar&lt;/a&gt; (I am sorry if I have forgotten any), but I want to implement my own. We’ll call this little game ‘Thieflike.’&lt;/p&gt;
+
+&lt;p&gt;I am assuming basic knowledge of Haskell - I’d say through the Monads chapters in either &lt;a href=&quot;http://learnyouahaskell.com/&quot;&gt;LYAH&lt;/a&gt; or &lt;a href=&quot;http://book.realworldhaskell.org/&quot;&gt;RWH&lt;/a&gt;. I may also suggest reading the Monad Transformers chapter in RWH, although we might skip on using a transformer - more about that later.&lt;/p&gt;
+
+&lt;p&gt;You need &lt;code&gt;ansi-terminal&lt;/code&gt; for this project, which you should be able to grab with &lt;code&gt;cabal install ansi-terminal&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;To start this project let’s just get a player character on the screen and get it to move around. We’ll need something to represent the game’s world as well as the hero. For the hero all we need is a tuple of &lt;code&gt;Int&lt;/code&gt;s to represent the position, and the world will be a datatype containing the hero. Let’s start a new file named &lt;code&gt;Main.hs&lt;/code&gt;, which we’ll use to contain all of our code for this portion of the project.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;--file: Main.hs&lt;/span&gt;
+&lt;span class='kr'&gt;module&lt;/span&gt; &lt;span class='nn'&gt;Main&lt;/span&gt; &lt;span class='kr'&gt;where&lt;/span&gt;
+
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;Prelude&lt;/span&gt; &lt;span class='k'&gt;hiding&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Either&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;..&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;System.Console.ANSI&lt;/span&gt;
+&lt;span class='kr'&gt;import&lt;/span&gt; &lt;span class='nn'&gt;System.IO&lt;/span&gt;
+
+&lt;span class='kr'&gt;type&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Int&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;Int&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now let’s put together a main function and show the character, represented with the traditional ‘@’ symbol.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='nf'&gt;main&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Blue&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putStrLn&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;@&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;setSGR&lt;/code&gt; function sets the ANSI Select Graphic Rendition mode, essentially it allows us to do things like set the console foreground and/or background color, the intensity of the color, etc. See the &lt;a href=&quot;http://hackage.haskell.org/packages/archive/ansi-terminal/0.5.5/doc/html/System-Console-ANSI.html&quot;&gt;haddock&lt;/a&gt; for more info.&lt;/p&gt;
+
+&lt;p&gt;This is cool that we’ve started using terminal function, but it doesn’t really do anything. We need to handle input and redraw the screen, so let’s add a data type declaration representing current possible inputs, such as moving the hero around or exiting the game.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='kr'&gt;data&lt;/span&gt; &lt;span class='kt'&gt;Input&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kt'&gt;Up&lt;/span&gt;
+           &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Down&lt;/span&gt;
+           &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Left&lt;/span&gt;
+           &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Right&lt;/span&gt;
+           &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='kt'&gt;Exit&lt;/span&gt;
+           &lt;span class='kr'&gt;deriving&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;Eq&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Remember when we hid Either in the Prelude module at the beginning of our file? That’s because our possible inputs of &lt;code&gt;Left&lt;/code&gt; and &lt;code&gt;Right&lt;/code&gt; conflicts with &lt;code&gt;Either&lt;/code&gt;’s data constructors.&lt;/p&gt;
+
+&lt;p&gt;Now to write the main loop - we need to handle input and redraw the screen. &lt;code&gt;main&lt;/code&gt; must also be rewritten to accommodate changes. We also need to add a few lines to make sure that input and output is not buffered - so the program will accept input without needing the user to press enter, and so that input is not echoed back out.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='nf'&gt;main&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;hSetEcho&lt;/span&gt; &lt;span class='n'&gt;stdin&lt;/span&gt; &lt;span class='kt'&gt;False&lt;/span&gt;
+  &lt;span class='n'&gt;hSetBuffering&lt;/span&gt; &lt;span class='n'&gt;stdin&lt;/span&gt;  &lt;span class='kt'&gt;NoBuffering&lt;/span&gt;
+  &lt;span class='n'&gt;hSetBuffering&lt;/span&gt; &lt;span class='n'&gt;stdout&lt;/span&gt; &lt;span class='kt'&gt;NoBuffering&lt;/span&gt;
+  &lt;span class='n'&gt;hideCursor&lt;/span&gt;
+  &lt;span class='n'&gt;setTitle&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Thieflike&amp;quot;&lt;/span&gt;
+  &lt;span class='n'&gt;gameLoop&lt;/span&gt; &lt;span class='o'&gt;$&lt;/span&gt; &lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;gameLoop&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;&lt;span class='o'&gt;@&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;drawHero&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt;
+  &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='n'&gt;getInput&lt;/span&gt;
+  &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+    &lt;span class='kt'&gt;Exit&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='nb'&gt;()&lt;/span&gt;
+    &lt;span class='kr'&gt;_&lt;/span&gt;    &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;handleDir&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;drawHero&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;clearScreen&lt;/span&gt;
+  &lt;span class='n'&gt;setCursorPosition&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt; &lt;span class='n'&gt;heroX&lt;/span&gt;
+  &lt;span class='n'&gt;setSGR&lt;/span&gt; &lt;span class='p'&gt;[&lt;/span&gt; &lt;span class='kt'&gt;SetConsoleIntensity&lt;/span&gt; &lt;span class='kt'&gt;BoldIntensity&lt;/span&gt;
+         &lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='kt'&gt;SetColor&lt;/span&gt; &lt;span class='kt'&gt;Foreground&lt;/span&gt; &lt;span class='kt'&gt;Vivid&lt;/span&gt; &lt;span class='kt'&gt;Blue&lt;/span&gt; &lt;span class='p'&gt;]&lt;/span&gt;
+  &lt;span class='n'&gt;putStr&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;@&amp;quot;&lt;/span&gt;
+
+&lt;span class='c1'&gt;-- receive a character and return our Input data structure,&lt;/span&gt;
+&lt;span class='c1'&gt;-- recursing on invalid input&lt;/span&gt;
+&lt;span class='nf'&gt;getInput&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;char&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='n'&gt;getChar&lt;/span&gt;
+  &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;char&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;q&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='kt'&gt;Exit&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;w&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='kt'&gt;Up&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;s&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='kt'&gt;Down&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;a&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='kt'&gt;Left&lt;/span&gt;
+    &lt;span class='n'&gt;&amp;#39;d&amp;#39;&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;return&lt;/span&gt; &lt;span class='kt'&gt;Right&lt;/span&gt;
+    &lt;span class='kr'&gt;_&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;getInput&lt;/span&gt;
+
+&lt;span class='c1'&gt;-- given a world and a direction, &amp;#39;adjust&amp;#39; the hero&amp;#39;s position, and loop&lt;/span&gt;
+&lt;span class='c1'&gt;-- with our updated hero&lt;/span&gt;
+&lt;span class='nf'&gt;handleDir&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt;&lt;span class='o'&gt;@&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;gameLoop&lt;/span&gt; &lt;span class='o'&gt;$&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;newCoord&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+  &lt;span class='kr'&gt;where&lt;/span&gt; &lt;span class='n'&gt;newCoord&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+                    &lt;span class='kt'&gt;Up&lt;/span&gt;    &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt; &lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+                    &lt;span class='kt'&gt;Down&lt;/span&gt;  &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+                    &lt;span class='kt'&gt;Left&lt;/span&gt;  &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt; &lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+                    &lt;span class='kt'&gt;Right&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now the hero moves around using the good old-fashioned ‘wasd’, and the player may quit by pressing ‘q’. This mostly does what we want - but what if we start pressing ‘a’ or ‘w’ from the starting position? It may appear that the hero is moving in the opposite direction from where we want. To keep this from happening we need to limit the hero’s movement. In fact, let’s keep the hero in between 0 and 80 in all directions. We should also remove the case section out of &lt;code&gt;handleDir&lt;/code&gt;, that way we can apply directions to anything, not just the player.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- operator to add 2 coordinates together&lt;/span&gt;
+&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;|+|&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;::&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='kt'&gt;Coord&lt;/span&gt;
+&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;|+|&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x2&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y2&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;x1&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='n'&gt;x2&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;y1&lt;/span&gt; &lt;span class='o'&gt;+&lt;/span&gt; &lt;span class='n'&gt;y2&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='nf'&gt;dirToCoord&lt;/span&gt; &lt;span class='n'&gt;d&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;d&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='kt'&gt;Up&lt;/span&gt;    &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='o'&gt;-&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;d&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='kt'&gt;Down&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;  &lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;d&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='kt'&gt;Left&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='o'&gt;-&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;d&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='kt'&gt;Right&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;1&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;  &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+  &lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;otherwise&lt;/span&gt;  &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;  &lt;span class='mi'&gt;0&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+
+
+&lt;span class='c1'&gt;-- add the supplied direction to the hero&amp;#39;s position, and set that&lt;/span&gt;
+&lt;span class='c1'&gt;-- to be the hero&amp;#39;s new position, making sure to limit the hero&amp;#39;s&lt;/span&gt;
+&lt;span class='c1'&gt;-- position between 0 and 80 in either direction&lt;/span&gt;
+&lt;span class='nf'&gt;handleDir&lt;/span&gt; &lt;span class='n'&gt;w&lt;/span&gt;&lt;span class='o'&gt;@&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;gameLoop&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;w&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='n'&gt;wHero&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;newCoord&lt;/span&gt; &lt;span class='p'&gt;})&lt;/span&gt;
+  &lt;span class='kr'&gt;where&lt;/span&gt; &lt;span class='n'&gt;newCoord&lt;/span&gt;       &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;newX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;newY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;heroX&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt; &lt;span class='o'&gt;|+|&lt;/span&gt; &lt;span class='n'&gt;dirToCoord&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt;
+        &lt;span class='n'&gt;hConst&lt;/span&gt; &lt;span class='n'&gt;i&lt;/span&gt;       &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;max&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;min&lt;/span&gt; &lt;span class='n'&gt;i&lt;/span&gt; &lt;span class='mi'&gt;80&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+        &lt;span class='n'&gt;newX&lt;/span&gt;           &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hConst&lt;/span&gt; &lt;span class='n'&gt;heroX&lt;/span&gt;
+        &lt;span class='n'&gt;newY&lt;/span&gt;           &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='n'&gt;hConst&lt;/span&gt; &lt;span class='n'&gt;heroY&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally, let’s make sure we say goodbye to the player when they press ‘q’,&lt;br /&gt;as well as set the cursor back to being visible:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='haskell'&gt;&lt;span class='c1'&gt;-- update the game loop to add in the goodbye message&lt;/span&gt;
+&lt;span class='nf'&gt;gameLoop&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt;&lt;span class='o'&gt;@&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;World&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;drawHero&lt;/span&gt; &lt;span class='n'&gt;hero&lt;/span&gt;
+  &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='ow'&gt;&amp;lt;-&lt;/span&gt; &lt;span class='n'&gt;getInput&lt;/span&gt;
+  &lt;span class='kr'&gt;case&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt; &lt;span class='kr'&gt;of&lt;/span&gt;
+    &lt;span class='kt'&gt;Exit&lt;/span&gt; &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;handleExit&lt;/span&gt;
+    &lt;span class='kr'&gt;_&lt;/span&gt;    &lt;span class='ow'&gt;-&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;handleDir&lt;/span&gt; &lt;span class='n'&gt;world&lt;/span&gt; &lt;span class='n'&gt;input&lt;/span&gt;
+
+
+
+&lt;span class='c1'&gt;-- when the user wants to exit we give them a thank you&lt;/span&gt;
+&lt;span class='c1'&gt;-- message and then reshow the cursor&lt;/span&gt;
+&lt;span class='nf'&gt;handleExit&lt;/span&gt; &lt;span class='ow'&gt;=&lt;/span&gt; &lt;span class='kr'&gt;do&lt;/span&gt;
+  &lt;span class='n'&gt;clearScreen&lt;/span&gt;
+  &lt;span class='n'&gt;setCursorPosition&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt; &lt;span class='mi'&gt;0&lt;/span&gt;
+  &lt;span class='n'&gt;showCursor&lt;/span&gt;
+  &lt;span class='n'&gt;putStrLn&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Thank you for playing!&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Great, the hero moves around and now we exit a little better than better and we have a goodbye message for the player. This is a small start to our roguelike, but its a good foundation. Next post we’ll work with adding some actual game elements to Thieflike.&lt;/p&gt;
+
+&lt;p&gt;The code and an install-able project for this post is located at: &lt;a href=&quot;https://github.com/jamiltron/Thieflike/tree/post01&quot;&gt;https://github.com/jamiltron/Thieflike/tree/post01&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Thank you for reading!&lt;/p&gt;</description>
+        <published>2012-07-10 00:00:00 +0200</published>
+        <link>http://jamiltron.com/2012/07/Code_Us_Some_Roguelike_in_Haskell.html</link>
+      </item>
+    
+      <item>
+        <title>RIP John McCarthy</title>
+        <description>&lt;p&gt;The past few weeks have been very sad. A lot has been said about McCarthy, he is one of the giants of our field. I am a Lisp fanatic, and honestly without having discovered Scheme and SICP years ago I would not be as interested in Computer Science as much as I am today without the foundation that McCarthy made. You will be truely missed, and thank you for all your work.&lt;/p&gt;
+
+&lt;p&gt;Thank you.&lt;/p&gt;</description>
+        <published>2011-11-07 00:00:00 +0100</published>
+        <link>http://jamiltron.com/2011/11/RIP_John_McCarthy.html</link>
+      </item>
+    
+      <item>
+        <title>RIP Dennis Ritchie</title>
+        <description>&lt;p&gt;I never met you, but you were truely a giant upon whose shoulders stand generations of scientists, programmers, designers, technologists, and many more. It is amazing just how great your contributions were, that C and Unix to date have such an impact on the industry. I am thankful for having been able to develop things based on your works, and without K&amp;amp;R 2e I don’t know if I would still be a programmer today. You will be missed.&lt;/p&gt;
+
+&lt;p&gt;Thank you.&lt;/p&gt;</description>
+        <published>2011-10-13 00:00:00 +0200</published>
+        <link>http://jamiltron.com/2011/10/RIP_Dennis_Ritchie.html</link>
+      </item>
+    
+      <item>
+        <title>Moving My Blog to Github</title>
+        <description>&lt;p&gt;Hello there, I thought I would try out moving my blog to github, and test out this whole Jekyll thing. I would like to make my blog posts a little more regular, and I hope I can hit maybe around a post every two weeks or so. I will be mostly talking about school and computer science on here. I will keep personal stuff to twitter and facebook. Anyway, I hope you enjoy!&lt;/p&gt;</description>
+        <published>2011-10-08 00:00:00 +0200</published>
+        <link>http://jamiltron.com/2011/10/moving_blog.html</link>
+      </item>
+    
   </channel>
 </rss>
