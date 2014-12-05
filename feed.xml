@@ -178,7 +178,7 @@
                &lt;span class=&#39;o&#39;&gt;|&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Left&lt;/span&gt;
                &lt;span class=&#39;o&#39;&gt;|&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Right&lt;/span&gt;
 
-
+ 
 &lt;span class=&#39;kr&#39;&gt;data&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Hero&lt;/span&gt; &lt;span class=&#39;ow&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Hero&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;hCurrPos&lt;/span&gt; &lt;span class=&#39;ow&#39;&gt;::&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Coord&lt;/span&gt;   
                  &lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;hGold&lt;/span&gt;    &lt;span class=&#39;ow&#39;&gt;::&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Int&lt;/span&gt;    
                  &lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;hHP&lt;/span&gt;      &lt;span class=&#39;ow&#39;&gt;::&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;Int&lt;/span&gt;    
