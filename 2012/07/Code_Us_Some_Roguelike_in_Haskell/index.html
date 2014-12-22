@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2012/07/Code_Us_Some_Roguelike_in_Haskell">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Code Us Some Roguelike in Haskell! | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Code Us Some Roguelike in Haskell!</h1>
+  <p class="text-muted">10 Jul 2012 |
+  
+  <a href="/categories/haskell">haskell</a>, 
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/roguelike">roguelike</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h2 class="post_title">Code Us Some Roguelike in Haskell!</h2>
+
+<p>I’ve recently been inspired by the great live coding of 
+<a href="http://www.youtube.com/watch?v=mtvoOIsN-GU&amp;feature=youtu.be">Sokoban</a> to put
+together a console and gui-based <a href="http://en.wikipedia.org/wiki/Roguelike">roguelike</a>
+in Haskell. There are already some really awesome roguelikes like 
+<a href="https://github.com/kosmikus/LambdaHack">LambdaHack</a>, 
+<a href="http://hackage.haskell.org/package/MazesOfMonad">Mazes of Monad</a>, 
+and <a href="http://roguestar.downstairspeople.org/">Roguestar</a> (I am sorry if I have forgotten any), 
+but I want to implement my own. We’ll call this little game ‘Thieflike.’</p>
+
+<p>I am assuming basic knowledge of Haskell - I’d say through the Monads chapters 
+in either <a href="http://learnyouahaskell.com/">LYAH</a> or 
+<a href="http://book.realworldhaskell.org/">RWH</a>. I may also suggest reading the Monad 
+Transformers chapter in RWH, although we might skip on using a transformer - 
+more about that later.</p>
+
+<p>You need <code>ansi-terminal</code> for this project, which you should be able to grab
+with <code>cabal install ansi-terminal</code>.</p>
+
+<p>To start this project let’s just get a player character on the screen
+and get it to move around. We’ll need something to represent the game’s
+world as well as the hero. For the hero all we need is a tuple of <code>Int</code>s to
+represent the position, and the world will be a datatype containing
+the hero. Let’s start a new file named <code>Main.hs</code>, which we’ll use to contain
+all of our code for this portion of the project.</p>
+
+<div class="highlight"><pre><code class="language-haskell" data-lang="haskell"><span class="c1">--file: Main.hs</span>
+<span class="kr">module</span> <span class="nn">Main</span> <span class="kr">where</span>
+
+<span class="kr">import</span> <span class="nn">Prelude</span> <span class="k">hiding</span> <span class="p">(</span><span class="kt">Either</span><span class="p">(</span><span class="o">..</span><span class="p">))</span>
+<span class="kr">import</span> <span class="nn">System.Console.ANSI</span>
+<span class="kr">import</span> <span class="nn">System.IO</span>
+
+<span class="kr">type</span> <span class="kt">Coord</span> <span class="ow">=</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">World</span> <span class="ow">=</span> <span class="kt">World</span> <span class="p">{</span> <span class="n">wHero</span> <span class="ow">::</span> <span class="kt">Coord</span> <span class="p">}</span></code></pre></div>
+
+<p>Now let’s put together a main function and show the character,
+represented with the traditional ‘@’ symbol.</p>
+
+<div class="highlight"><pre><code class="language-haskell" data-lang="haskell"><span class="nf">main</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">setSGR</span> <span class="p">[</span> <span class="kt">SetConsoleIntensity</span> <span class="kt">BoldIntensity</span>
+         <span class="p">,</span> <span class="kt">SetColor</span> <span class="kt">Foreground</span> <span class="kt">Vivid</span> <span class="kt">Blue</span> <span class="p">]</span>
+  <span class="n">putStrLn</span> <span class="s">&quot;@&quot;</span></code></pre></div>
+
+<p>The <code>setSGR</code> function sets the ANSI Select Graphic Rendition mode, essentially
+it allows us to do things like set the console foreground and/or
+background color, the intensity of the color, etc. See the
+<a href="http://hackage.haskell.org/packages/archive/ansi-terminal/0.5.5/doc/html/System-Console-ANSI.html">haddock</a> for more info.</p>
+
+<p>This is cool that we’ve started using terminal function, but it doesn’t
+really do anything. We need to handle input and redraw the screen, so let’s
+add a data type declaration representing current possible inputs, such as
+moving the hero around or exiting the game.</p>
+
+<div class="highlight"><pre><code class="language-haskell" data-lang="haskell"><span class="kr">data</span> <span class="kt">Input</span> <span class="ow">=</span> <span class="kt">Up</span>
+           <span class="o">|</span> <span class="kt">Down</span>
+           <span class="o">|</span> <span class="kt">Left</span>
+           <span class="o">|</span> <span class="kt">Right</span>
+           <span class="o">|</span> <span class="kt">Exit</span>
+           <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Eq</span><span class="p">)</span></code></pre></div>
+
+<p>Remember when we hid Either in the Prelude module at the beginning of our
+file? That’s because our possible inputs of <code>Left</code> and <code>Right</code> conflicts with
+<code>Either</code>’s data constructors.</p>
+
+<p>Now to write the main loop - we need to handle input and redraw the
+screen. <code>main</code> must also be rewritten to accommodate changes. 
+We also need to add a few lines to make sure that input and output 
+is not buffered - so the program will accept input without needing the 
+user to press enter, and so that input is not echoed back out.</p>
+
+<div class="highlight"><pre><code class="language-haskell" data-lang="haskell"><span class="nf">main</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">hSetEcho</span> <span class="n">stdin</span> <span class="kt">False</span>
+  <span class="n">hSetBuffering</span> <span class="n">stdin</span>  <span class="kt">NoBuffering</span>
+  <span class="n">hSetBuffering</span> <span class="n">stdout</span> <span class="kt">NoBuffering</span>
+  <span class="n">hideCursor</span>
+  <span class="n">setTitle</span> <span class="s">&quot;Thieflike&quot;</span>
+  <span class="n">gameLoop</span> <span class="o">$</span> <span class="kt">World</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+
+<span class="nf">gameLoop</span> <span class="n">world</span><span class="o">@</span><span class="p">(</span><span class="kt">World</span> <span class="n">hero</span><span class="p">)</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">drawHero</span> <span class="n">hero</span>
+  <span class="n">input</span> <span class="ow">&lt;-</span> <span class="n">getInput</span>
+  <span class="kr">case</span> <span class="n">input</span> <span class="kr">of</span>
+    <span class="kt">Exit</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="nb">()</span>
+    <span class="kr">_</span>    <span class="ow">-&gt;</span> <span class="n">handleDir</span> <span class="n">world</span> <span class="n">input</span>
+
+
+<span class="nf">drawHero</span> <span class="p">(</span><span class="n">heroX</span><span class="p">,</span> <span class="n">heroY</span><span class="p">)</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">clearScreen</span>
+  <span class="n">setCursorPosition</span> <span class="n">heroY</span> <span class="n">heroX</span>
+  <span class="n">setSGR</span> <span class="p">[</span> <span class="kt">SetConsoleIntensity</span> <span class="kt">BoldIntensity</span>
+         <span class="p">,</span> <span class="kt">SetColor</span> <span class="kt">Foreground</span> <span class="kt">Vivid</span> <span class="kt">Blue</span> <span class="p">]</span>
+  <span class="n">putStr</span> <span class="s">&quot;@&quot;</span>
+
+<span class="c1">-- receive a character and return our Input data structure,</span>
+<span class="c1">-- recursing on invalid input</span>
+<span class="nf">getInput</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">char</span> <span class="ow">&lt;-</span> <span class="n">getChar</span>
+  <span class="kr">case</span> <span class="n">char</span> <span class="kr">of</span>
+    <span class="n">&#39;q&#39;</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="kt">Exit</span>
+    <span class="n">&#39;w&#39;</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="kt">Up</span>
+    <span class="n">&#39;s&#39;</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="kt">Down</span>
+    <span class="n">&#39;a&#39;</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="kt">Left</span>
+    <span class="n">&#39;d&#39;</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="kt">Right</span>
+    <span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">getInput</span>
+
+<span class="c1">-- given a world and a direction, &#39;adjust&#39; the hero&#39;s position, and loop</span>
+<span class="c1">-- with our updated hero</span>
+<span class="nf">handleDir</span> <span class="n">w</span><span class="o">@</span><span class="p">(</span><span class="kt">World</span> <span class="p">(</span><span class="n">heroX</span><span class="p">,</span> <span class="n">heroY</span><span class="p">))</span> <span class="n">input</span> <span class="ow">=</span> <span class="n">gameLoop</span> <span class="o">$</span> <span class="n">w</span> <span class="p">{</span> <span class="n">wHero</span> <span class="ow">=</span> <span class="n">newCoord</span> <span class="p">}</span>
+  <span class="kr">where</span> <span class="n">newCoord</span> <span class="ow">=</span> <span class="kr">case</span> <span class="n">input</span> <span class="kr">of</span>
+                    <span class="kt">Up</span>    <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">heroX</span><span class="p">,</span> <span class="n">heroY</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="kt">Down</span>  <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">heroX</span><span class="p">,</span> <span class="n">heroY</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="kt">Left</span>  <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">heroX</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">heroY</span><span class="p">)</span>
+                    <span class="kt">Right</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">heroX</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">heroY</span><span class="p">)</span></code></pre></div>
+
+<p>Now the hero moves around using the good old-fashioned ‘wasd’, and the player
+may quit by pressing ‘q’.
+This mostly does what we want - but what if we start pressing
+‘a’ or ‘w’ from the starting position? It may appear that
+the hero is moving in the opposite direction from where
+we want. To keep this from happening we need to limit the
+hero’s movement. In fact, let’s keep the hero in between 0 and
+80 in all directions. We should also remove the case section out of
+<code>handleDir</code>, that way we can apply directions to anything, not just the
+player.</p>
+
+<div class="highlight"><pre><code class="language-haskell" data-lang="haskell"><span class="c1">-- operator to add 2 coordinates together</span>
+<span class="p">(</span><span class="o">|+|</span><span class="p">)</span> <span class="ow">::</span> <span class="kt">Coord</span> <span class="ow">-&gt;</span> <span class="kt">Coord</span> <span class="ow">-&gt;</span> <span class="kt">Coord</span>
+<span class="p">(</span><span class="o">|+|</span><span class="p">)</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span> <span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">y2</span><span class="p">)</span>
+
+
+<span class="nf">dirToCoord</span> <span class="n">d</span>
+  <span class="o">|</span> <span class="n">d</span> <span class="o">==</span> <span class="kt">Up</span>    <span class="ow">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+  <span class="o">|</span> <span class="n">d</span> <span class="o">==</span> <span class="kt">Down</span>  <span class="ow">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">)</span>
+  <span class="o">|</span> <span class="n">d</span> <span class="o">==</span> <span class="kt">Left</span>  <span class="ow">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="o">|</span> <span class="n">d</span> <span class="o">==</span> <span class="kt">Right</span> <span class="ow">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">)</span>
+  <span class="o">|</span> <span class="n">otherwise</span>  <span class="ow">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">)</span>
+
+
+<span class="c1">-- add the supplied direction to the hero&#39;s position, and set that</span>
+<span class="c1">-- to be the hero&#39;s new position, making sure to limit the hero&#39;s</span>
+<span class="c1">-- position between 0 and 80 in either direction</span>
+<span class="nf">handleDir</span> <span class="n">w</span><span class="o">@</span><span class="p">(</span><span class="kt">World</span> <span class="n">hero</span><span class="p">)</span> <span class="n">input</span> <span class="ow">=</span> <span class="n">gameLoop</span> <span class="p">(</span><span class="n">w</span> <span class="p">{</span> <span class="n">wHero</span> <span class="ow">=</span> <span class="n">newCoord</span> <span class="p">})</span>
+  <span class="kr">where</span> <span class="n">newCoord</span>       <span class="ow">=</span> <span class="p">(</span><span class="n">newX</span><span class="p">,</span> <span class="n">newY</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">heroX</span><span class="p">,</span> <span class="n">heroY</span><span class="p">)</span> <span class="ow">=</span> <span class="n">hero</span> <span class="o">|+|</span> <span class="n">dirToCoord</span> <span class="n">input</span>
+        <span class="n">hConst</span> <span class="n">i</span>       <span class="ow">=</span> <span class="n">max</span> <span class="mi">0</span> <span class="p">(</span><span class="n">min</span> <span class="n">i</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="n">newX</span>           <span class="ow">=</span> <span class="n">hConst</span> <span class="n">heroX</span>
+        <span class="n">newY</span>           <span class="ow">=</span> <span class="n">hConst</span> <span class="n">heroY</span></code></pre></div>
+
+<p>Finally, let’s make sure we say goodbye to the player when they press ‘q’,<br />
+as well as set the cursor back to being visible:</p>
+
+<div class="highlight"><pre><code class="language-haskell" data-lang="haskell"><span class="c1">-- update the game loop to add in the goodbye message</span>
+<span class="nf">gameLoop</span> <span class="n">world</span><span class="o">@</span><span class="p">(</span><span class="kt">World</span> <span class="n">hero</span><span class="p">)</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">drawHero</span> <span class="n">hero</span>
+  <span class="n">input</span> <span class="ow">&lt;-</span> <span class="n">getInput</span>
+  <span class="kr">case</span> <span class="n">input</span> <span class="kr">of</span>
+    <span class="kt">Exit</span> <span class="ow">-&gt;</span> <span class="n">handleExit</span>
+    <span class="kr">_</span>    <span class="ow">-&gt;</span> <span class="n">handleDir</span> <span class="n">world</span> <span class="n">input</span>
+
+
+
+<span class="c1">-- when the user wants to exit we give them a thank you</span>
+<span class="c1">-- message and then reshow the cursor</span>
+<span class="nf">handleExit</span> <span class="ow">=</span> <span class="kr">do</span>
+  <span class="n">clearScreen</span>
+  <span class="n">setCursorPosition</span> <span class="mi">0</span> <span class="mi">0</span>
+  <span class="n">showCursor</span>
+  <span class="n">putStrLn</span> <span class="s">&quot;Thank you for playing!&quot;</span></code></pre></div>
+
+<p>Great, the hero moves around and now we exit a little better than better and we
+have a goodbye message for the player. This is a small start to our roguelike, but its
+a good foundation. Next post we’ll work with adding some actual game elements to Thieflike.</p>
+
+<p>The code and an install-able project for this post is located at:
+<a href="https://github.com/jamiltron/Thieflike/tree/post01">https://github.com/jamiltron/Thieflike/tree/post01</a></p>
+
+<p>Thank you for reading!</p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (9)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2011/11/RIP_John_McCarthy">RIP John McCarthy</a></h2>
+          <p>Another great loss.</p>
+
+        </div>
+      
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Newer
+            
+          </h3>
+          <h2 class="post-title-link"><a href="/2012/07/Code_Us_Some_Roguelike2">Code Us Some Roguelike in Haskell (Part 2)!</a></h2>
+          <p>Part 2 of the Roguelike tutorial.</p>
+
+        </div>
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2014.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
