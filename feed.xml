@@ -5,9 +5,50 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 21 Dec 2014 17:28:29 -0800</pubDate>
-    <lastBuildDate>Sun, 21 Dec 2014 17:28:29 -0800</lastBuildDate>
+    <pubDate>Wed, 28 Jan 2015 22:10:10 -0800</pubDate>
+    <lastBuildDate>Wed, 28 Jan 2015 22:10:10 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Global Game Jam 2015</title>
+        <description>&lt;h3 id=&quot;global-game-jam-2015&quot;&gt;Global Game Jam 2015&lt;/h3&gt;
+
+&lt;p&gt;This past Sunday I had the pleasure of attending Global Game Jam 2015
+at Oakland’s
+&lt;a href=&quot;http://themade.org&quot;&gt;Museum of Art and Digital Entertainment&lt;/a&gt;, which
+is always a great place - definitely something you should check out if
+you are visiting the Bay Area or live here and haven’t been there
+recently.&lt;/p&gt;
+
+&lt;p&gt;They were kind to host this year’s Global Game Jam for the Bay Area,
+and the theme this year was “What do we do next?” My team had a pretty
+awesome sound engineer join us, so we definitely wanted to make a
+collaborative, multiplayer-instrument.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately he became ill and had to leave the jam, which left the
+rest of us working on adding sounds, filters, and the like to the
+game, which we only sort of understood.&lt;/p&gt;
+
+&lt;p&gt;I do not think we got as far as making a “game” as I would have liked,
+but I am still proud of what we made, and am very grateful of my
+awesome team.&lt;/p&gt;
+
+&lt;p&gt;If you want you can check out the game
+&lt;a href=&quot;http://globalgamejam.org/2015/games/sound-beasts&quot;&gt;here&lt;/a&gt;. If you do,
+let me know what you think!&lt;/p&gt;
+
+&lt;p&gt;Again, thanks to my awesome team and to the great folks at &lt;a href=&quot;http://themade.org&quot;&gt;MADE&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 28 Jan 2015 00:00:00 -0800</pubDate>
+        <link>http://jamiltron.com/2015/01/Global-Game-Jam-2015</link>
+        <guid isPermaLink="true">http://jamiltron.com/2015/01/Global-Game-Jam-2015</guid>
+        
+        
+        <category>game-dev</category>
+        
+        <category>game-jams</category>
+        
+      </item>
     
       <item>
         <title>Networked Platformer</title>
