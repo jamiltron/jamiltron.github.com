@@ -8,9 +8,9 @@
     <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
     <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="canonical" href="http://jamiltron.com/2011/11/RIP_John_McCarthy">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Intro">
     <link rel="shortcut icon" href="/favicon.ico">
-    <title>RIP John McCarthy | Jamiltron</title>
+    <title>Kha Shmup Tutorial Intro | Jamiltron</title>
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -51,21 +51,80 @@
         
           <div class="col-sm-8">
             <div class="post-header">
-  <h1 class="post-title-main">RIP John McCarthy</h1>
-  <p class="text-muted">07 Nov 2011 |
+  <h1 class="post-title-main">Kha Shmup Tutorial Intro</h1>
+  <p class="text-muted">08 Dec 2015 |
   
-  <a href="/categories/computer-science">computer-science</a>
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/haxe">haxe</a>
   
 </p>
 
 </div>
 <div class="post-content">
-  <p>The past few weeks have been very sad. A lot has been said about McCarthy, he is one of the giants of our field. 
-I am a Lisp fanatic, and honestly without having discovered Scheme and SICP years ago I would not be as interested in 
-Computer Science as much as I am today without the foundation that McCarthy made. You will be truely missed, and thank 
-you for all your work.</p>
+  <h3 id="kha-shmup-tutorial-part-0">Kha Shmup Tutorial Part 0</h3>
 
-<p>Thank you.</p>
+<p><a href="kha.ktxsoftware.com">Kha</a> describes itself as a “super-portable dev
+kit.” The tool is kind of equivalent to the <a href="http://haxe.org/">Haxe</a>
+version of <a href="https://www.libsdl.org/">SDL</a>. Essentially its a tool by
+which you can use Haxe to make games or other media applications, and
+it allows you to target Linux, OSX, Windows, Android, iOS, HTML5, and
+several other targets very efficiently.</p>
+
+<p>Kha has always seemed super interesting to me - I love Haxe, and I am
+always on the lookout for open source game frameworks that have a high
+degree of portability. I love and continue to use
+<a href="http://unity3d.com/">Unity3d</a>, but I feel it has a few downsides when
+it comes to 2d development, and often I feel its closed-source nature
+fights against it. Recently I was trying to learn the low-level
+Transport Layer Networking in Unity, and there were often questions I
+had that would have been easily grokkable had I access to the source.</p>
+
+<p>Kha seems like a great tool, but I have had many complaints about it,
+which I have seen shared among a few other developers who have tried
+getting into it - it uses an unfamiliar build system, its api is
+somewhat of a moving target, and worst of all - it lacks
+documentation.</p>
+
+<p>That last part is often a curse that kill many open source projects -
+no matter how good your software may be, if people can’t figure out
+how to use it, it won’t get used. When people are looking for a
+library or framework to use they aren’t often willing to read a
+majority of the code base, post on forums, jump into irc channels and
+the like.</p>
+
+<p>The lack of documentation is one that is pretty easily solved - people
+who have actually penetrated and started undestanding the software
+just have to write down, talk about, or cast themselves discussing it.</p>
+
+<p>I decided rather than look at Kha and say “Eh, not enough docs for
+me..” that I should try to understand as much of it as I can and write
+down what will hopefully be helpful to others. The Kha community has
+been very welcoming and helpful to me, someone who basically just pops
+up once and a while and asks “how do I…”</p>
+
+<p>So my process of documenting will be the creation of a very small
+shoot ‘em up game, or “shmup.” I will be going step-by-step on github,
+so hopefully as I explain each step you will be able to see the code
+and how one might grow a small Kha program.</p>
+
+<p>I will be assuming that you know Haxe. If you do not
+<a href="http://haxe.org/documentation/introduction/">the documentation</a> is
+alright to get started. For reference I am using 3.2.1 on OSX, but
+this should work on Linux or Windows.</p>
+
+<p>To run my examples you will need a copy of NodeJS, which you can
+download <a href="http://nodejs.org/">here</a>.</p>
+
+<p>Kha is often included as a submodule within an individual Kha project,
+which is how I have it set up in this tutorial. You can use Kha from
+haxelib, but the version I am targeting has not been released to
+haxelib yet. I will update these tutorials when it has.</p>
+
+<p>Once you have Haxe ready to go and a recent version of NodeJS, we will
+be ready to begin putting our game together.</p>
 
 </div>
 <div class="post-footer">
@@ -90,21 +149,11 @@ you for all your work.</p>
             <span class="text-muted"> &middot; </span>
             <a href="/archive">View Archive (11)</a>
           </h3>
-          <h2 class="post-title-link"><a href="/2011/10/RIP_Dennis_Ritchie">RIP Dennis Ritchie</a></h2>
-          <p>Thank you for everything, you will be missed.</p>
+          <h2 class="post-title-link"><a href="/2015/01/Global-Game-Jam-2015">Global Game Jam 2015</a></h2>
+          <p>Always a fun time.</p>
 
         </div>
       
-      
-        <div class="col-md-6 post-nav">
-          <h3 class="section-header">
-            Newer
-            
-          </h3>
-          <h2 class="post-title-link"><a href="/2012/07/Code_Us_Some_Roguelike_in_Haskell">Code Us Some Roguelike in Haskell!</a></h2>
-          <p>A fun game project in Haskell.</p>
-
-        </div>
       
     </div>
   

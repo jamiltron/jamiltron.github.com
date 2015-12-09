@@ -5,9 +5,86 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 18 Feb 2015 18:21:09 -0800</pubDate>
-    <lastBuildDate>Wed, 18 Feb 2015 18:21:09 -0800</lastBuildDate>
+    <pubDate>Tue, 08 Dec 2015 20:03:48 -0800</pubDate>
+    <lastBuildDate>Tue, 08 Dec 2015 20:03:48 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Kha Shmup Tutorial Intro</title>
+        <description>&lt;h3 id=&quot;kha-shmup-tutorial-part-0&quot;&gt;Kha Shmup Tutorial Part 0&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;kha.ktxsoftware.com&quot;&gt;Kha&lt;/a&gt; describes itself as a “super-portable dev
+kit.” The tool is kind of equivalent to the &lt;a href=&quot;http://haxe.org/&quot;&gt;Haxe&lt;/a&gt;
+version of &lt;a href=&quot;https://www.libsdl.org/&quot;&gt;SDL&lt;/a&gt;. Essentially its a tool by
+which you can use Haxe to make games or other media applications, and
+it allows you to target Linux, OSX, Windows, Android, iOS, HTML5, and
+several other targets very efficiently.&lt;/p&gt;
+
+&lt;p&gt;Kha has always seemed super interesting to me - I love Haxe, and I am
+always on the lookout for open source game frameworks that have a high
+degree of portability. I love and continue to use
+&lt;a href=&quot;http://unity3d.com/&quot;&gt;Unity3d&lt;/a&gt;, but I feel it has a few downsides when
+it comes to 2d development, and often I feel its closed-source nature
+fights against it. Recently I was trying to learn the low-level
+Transport Layer Networking in Unity, and there were often questions I
+had that would have been easily grokkable had I access to the source.&lt;/p&gt;
+
+&lt;p&gt;Kha seems like a great tool, but I have had many complaints about it,
+which I have seen shared among a few other developers who have tried
+getting into it - it uses an unfamiliar build system, its api is
+somewhat of a moving target, and worst of all - it lacks
+documentation.&lt;/p&gt;
+
+&lt;p&gt;That last part is often a curse that kill many open source projects -
+no matter how good your software may be, if people can’t figure out
+how to use it, it won’t get used. When people are looking for a
+library or framework to use they aren’t often willing to read a
+majority of the code base, post on forums, jump into irc channels and
+the like.&lt;/p&gt;
+
+&lt;p&gt;The lack of documentation is one that is pretty easily solved - people
+who have actually penetrated and started undestanding the software
+just have to write down, talk about, or cast themselves discussing it.&lt;/p&gt;
+
+&lt;p&gt;I decided rather than look at Kha and say “Eh, not enough docs for
+me..” that I should try to understand as much of it as I can and write
+down what will hopefully be helpful to others. The Kha community has
+been very welcoming and helpful to me, someone who basically just pops
+up once and a while and asks “how do I…”&lt;/p&gt;
+
+&lt;p&gt;So my process of documenting will be the creation of a very small
+shoot ‘em up game, or “shmup.” I will be going step-by-step on github,
+so hopefully as I explain each step you will be able to see the code
+and how one might grow a small Kha program.&lt;/p&gt;
+
+&lt;p&gt;I will be assuming that you know Haxe. If you do not
+&lt;a href=&quot;http://haxe.org/documentation/introduction/&quot;&gt;the documentation&lt;/a&gt; is
+alright to get started. For reference I am using 3.2.1 on OSX, but
+this should work on Linux or Windows.&lt;/p&gt;
+
+&lt;p&gt;To run my examples you will need a copy of NodeJS, which you can
+download &lt;a href=&quot;http://nodejs.org/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Kha is often included as a submodule within an individual Kha project,
+which is how I have it set up in this tutorial. You can use Kha from
+haxelib, but the version I am targeting has not been released to
+haxelib yet. I will update these tutorials when it has.&lt;/p&gt;
+
+&lt;p&gt;Once you have Haxe ready to go and a recent version of NodeJS, we will
+be ready to begin putting our game together.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 08 Dec 2015 00:00:00 -0800</pubDate>
+        <link>http://jamiltron.com/2015/12/KhaShmup-Tutorial-Intro</link>
+        <guid isPermaLink="true">http://jamiltron.com/2015/12/KhaShmup-Tutorial-Intro</guid>
+        
+        
+        <category>game-dev</category>
+        
+        <category>kha</category>
+        
+        <category>haxe</category>
+        
+      </item>
     
       <item>
         <title>Global Game Jam 2015</title>
