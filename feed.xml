@@ -5,15 +5,15 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 08 Dec 2015 20:03:48 -0800</pubDate>
-    <lastBuildDate>Tue, 08 Dec 2015 20:03:48 -0800</lastBuildDate>
+    <pubDate>Tue, 08 Dec 2015 20:11:09 -0800</pubDate>
+    <lastBuildDate>Tue, 08 Dec 2015 20:11:09 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>Kha Shmup Tutorial Intro</title>
         <description>&lt;h3 id=&quot;kha-shmup-tutorial-part-0&quot;&gt;Kha Shmup Tutorial Part 0&lt;/h3&gt;
 
-&lt;p&gt;&lt;a href=&quot;kha.ktxsoftware.com&quot;&gt;Kha&lt;/a&gt; describes itself as a “super-portable dev
+&lt;p&gt;&lt;a href=&quot;http://kha.ktxsoftware.com&quot;&gt;Kha&lt;/a&gt; describes itself as a “super-portable dev
 kit.” The tool is kind of equivalent to the &lt;a href=&quot;http://haxe.org/&quot;&gt;Haxe&lt;/a&gt;
 version of &lt;a href=&quot;https://www.libsdl.org/&quot;&gt;SDL&lt;/a&gt;. Essentially its a tool by
 which you can use Haxe to make games or other media applications, and
