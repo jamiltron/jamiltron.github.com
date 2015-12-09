@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 08 Dec 2015 20:25:31 -0800</pubDate>
-    <lastBuildDate>Tue, 08 Dec 2015 20:25:31 -0800</lastBuildDate>
+    <pubDate>Tue, 08 Dec 2015 20:27:42 -0800</pubDate>
+    <lastBuildDate>Tue, 08 Dec 2015 20:27:42 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -35,7 +35,7 @@ getting into it - it uses an unfamiliar build system, its api is
 somewhat of a moving target, and worst of all - it lacks
 documentation.&lt;/p&gt;
 
-&lt;p&gt;That last part is often a curse that kill many open source projects -
+&lt;p&gt;That last part is often a curse that kills many open source projects -
 no matter how good your software may be, if people can’t figure out
 how to use it, it won’t get used. When people are looking for a
 library or framework to use they aren’t often willing to read a
