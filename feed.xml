@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 10 Dec 2015 00:13:00 -0800</pubDate>
-    <lastBuildDate>Thu, 10 Dec 2015 00:13:00 -0800</lastBuildDate>
+    <pubDate>Thu, 10 Dec 2015 00:14:31 -0800</pubDate>
+    <lastBuildDate>Thu, 10 Dec 2015 00:14:31 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -213,7 +213,7 @@ node Kha/make osx --run
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;Again, if you have any issues, compare your code to my repo:
-https://github.com/jamiltron/KhaShmup/tree/part-1&lt;/p&gt;
+&lt;a href=&quot;https://github.com/jamiltron/KhaShmup/tree/part-1&quot;&gt;https://github.com/jamiltron/KhaShmup/tree/part-1&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;I know it seems like we haven’t gotten that far, but getting all of
 the required software and spinning up a project will be a good
