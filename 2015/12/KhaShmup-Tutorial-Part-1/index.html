@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-1">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 1 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 1</h1>
+  <p class="text-muted">09 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-1">Kha Shmup Tutorial Part 1</h3>
+
+<p>Continuing from the
+<a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Intro/">previous tutorial</a>
+we’ve made sure we are running a recent version of <a href="http://haxe.org/">Haxe</a>
+(I am running 3.2.1), a recent version of <a href="https://nodejs.org/en/">NodeJS</a>
+(5.0.0 for me), as well as the <a href="https://git-scm.com/">git</a> version control
+system.</p>
+
+<h4 id="game-features">Game Features</h4>
+<p>Throughout this tutorial we will be building a small space shooter. I
+want to build a small game, but to make sure its not trivial. This
+game will have the following features:</p>
+
+<ul>
+  <li>A ship the player can move around.</li>
+  <li>Enemies who randomly spawn.</li>
+  <li>The ability to shoot lasers to destroy enemies.</li>
+  <li>A score representing the amount of enemies destroyed, represented
+with text.</li>
+  <li>The “ability” to lose if the player collides with an enemy.</li>
+  <li>A few game states, such as main menu, playing, and game over.</li>
+  <li>Music and sounds.</li>
+  <li>Object pooling on the bullets the player can shoot, as well as the enemy.</li>
+</ul>
+
+<p>I think this will be enough to showcase several of Kha’s features, and
+allow for further expansion. This tutorial will be built in a somewhat
+naive fashion - we are mostly trying to provide a starting point for
+making a game in Kha. Refactoring into a solid code-base is left as an
+exercise to the reader :P</p>
+
+<h4 id="getting-started">Getting Started</h4>
+<p>Kha is typically handled as a git submodule to another project, which
+is how we will be using it. Check out a basic empty project by typing
+the following into your console:</p>
+
+<p><code>
+git clone --recursive https://github.com/KTXSoftware/Empty.git
+</code></p>
+
+<p>After cloning if you want to rename the directory feel free to do so.</p>
+
+<p>You’ll see a few files and directories in here:</p>
+
+<ul>
+  <li>Kha - this contains the sources for the Kha framework as well as the
+tools it uses. You shouldn’t have to mess with this.</li>
+  <li>Sources - is where all of the source files for our game will live.</li>
+  <li>khafile.js - this is the build file for the entire project.</li>
+</ul>
+
+<h4 id="khafilejs">khafile.js</h4>
+<p>Let’s open up khafile.js, get rid of everything and replace it with
+the following:</p>
+
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaShmup&#39;</span><span class="p">);</span>
+
+<span class="nx">project</span><span class="p">.</span><span class="nx">addSources</span><span class="p">(</span><span class="s1">&#39;Sources&#39;</span><span class="p">);</span>
+
+<span class="k">return</span> <span class="nx">project</span><span class="p">;</span></code></pre></div>
+
+<p>This defines a project named ‘KhaShmup’ and makes sure to tell the
+project to use the files found in the Sources directory. Let’s check
+out that directory now.</p>
+
+<p>In Sources we find two files - Empty.hx, and Main.hx. Main is the
+entry point for the program, and Empty is the “game.” We can get rid
+of this as we’ll be using a class for our own game.</p>
+
+<h4 id="mainhx">Main.hx</h4>
+<p>Start by opening up Main.hx and enter the following:</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">System</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Main</span> <span class="p">{</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">System</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="s2">&quot;KhaShmup&quot;</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="n">init</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> game <span class="o">=</span> <span class="k">new</span> <span class="n">KhaShmup</span><span class="p">();</span>
+    <span class="n">System</span><span class="p">.</span><span class="n">notifyOnRender</span><span class="p">(</span><span class="n">game</span><span class="p">.</span><span class="n">render</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This class has an entry point main, which initializes Kha’s system,
+sets the window name as “KhaShmup”, the width of the window to 800,
+the height to 600, and provides a callback of the function init once
+the System is ready to go.</p>
+
+<p>The callback is where we create an instance of our game, and we tell
+the system that when it renders, we want to call our game’s render
+method.</p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+<p>Create a file in the Sources directory named KhaShmup.hx and add the
+following lines to it:</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Color</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Framebuffer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Scaler</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">System</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">KhaShmup</span> <span class="p">{</span>
+
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">var</span> bgColor <span class="o">=</span> <span class="n">Color</span><span class="p">.</span><span class="n">fromValue</span><span class="p">(</span><span class="mh">0x26004d</span><span class="p">);</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> screenWidth <span class="o">=</span> <span class="mi">800</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> screenHeight <span class="o">=</span> <span class="mi">600</span><span class="p">;</span>
+
+  <span class="kd">private</span> <span class="kd">var</span> backbuffer<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// create a buffer to draw to</span>
+    <span class="n">backbuffer</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="n">createRenderTarget</span><span class="p">(</span><span class="n">screenWidth</span><span class="p">,</span> <span class="n">screenHeight</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">framebuffer</span><span class="p">:</span> <span class="n">Framebuffer</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="kd">var</span> g <span class="o">=</span> <span class="n">backbuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">;</span>
+
+    <span class="c1">// clear our backbuffer using graphics2</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">bgColor</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+
+    <span class="c1">// draw our backbuffer onto the active framebuffer</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+    <span class="n">Scaler</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="n">backbuffer</span><span class="p">,</span> <span class="n">framebuffer</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">screenRotation</span><span class="p">);</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This is our main game class. We start by instantiating a “back
+buffer” - this allows us to use
+<a href="https://en.wikipedia.org/wiki/Multiple_buffering">double buffering</a>
+so that we draw to a “back” buffer - one that is not rendered to the
+screen yet, and when it becomes time to do so, we just swap the
+currently rendered buffer with our back buffer.</p>
+
+<p>In the render method, we recieve a framebuffer - the currently
+rendered buffer. We then get a member “g2” from our backbuffer. This
+is an instance of the
+<a href="https://github.com/KTXSoftware/Kha/blob/master/Sources/kha/graphics2/Graphics.hx">graphics2 api</a>
+in Kha. This is pretty much the api you will be using for 2d
+rendering, html5 canvas, etc. Kha versions its apis into numbers, so
+there is a g4 representing 3d graphics, multiple audio apis, etc.</p>
+
+<p>With this instance we clear it to our preset background color - which
+is kind of a dark purple.</p>
+
+<p>We then draw our purple backbuffer onto the frame buffer. The
+Scaler.scale method basically scales the “source” image - our
+backbuffer, to the size of our “destination” image - the framebuffer,
+and the renders the source onto the destination. The begin
+and end methods on the graphics instances are done so that Kha can
+batch draw operations where possible, providing pretty great rendering
+performance.</p>
+
+<h4 id="running-the-application">Running the application</h4>
+<p>There are a number of different ways you can run a Kha application,
+but the way that I typically do is to navigate to the root of the project
+directory and to run the following:</p>
+
+<pre><code>node Kha/make html5     
+node Kha/make --server
+</code></pre>
+
+<p>This will compile the html5 target, and then serve it on
+localhost:8080. If you go there you should see a big purple screen.</p>
+
+<p><img src="/images/HelloPurpleScreen.png" alt="Hello, Purple Screen" /></p>
+
+<p>If you don’t you can compare your code to the part-1 branch of my
+repo:</p>
+
+<p><a href="https://github.com/jamiltron/KhaShmup/tree/part-1">https://github.com/jamiltron/KhaShmup/tree/part-1</a></p>
+
+<p>An interesting thing about the build system is that Kha will generate
+projects for your targeted platform. For example, if I wanted an XCode
+project for OSX, running</p>
+
+<p><code>
+node Kha/make osx
+</code></p>
+
+<p>would build an XCode project in the build directory, which I then
+could open up in XCode, allowing me to use all the tools associated
+with that platform. That’s a pretty cool feature, as sometimes
+tracking down issues in the output of compiled Haxe code from the
+terminal can be pretty frustrating. However if I want to quickly
+compile and run natively for osx, I could just run</p>
+
+<p><code>
+node Kha/make osx --run
+</code></p>
+
+<p>Again, if you have any issues, compare your code to my repo:
+https://github.com/jamiltron/KhaShmup/tree/part-1</p>
+
+<p>I know it seems like we haven’t gotten that far, but getting all of
+the required software and spinning up a project will be a good
+starting point for rendering an image on screen, which we will get to
+in part 2.</p>
+
+<p>Thank you for reading!</p>
+
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (12)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Intro">Kha Shmup Tutorial Intro</a></h2>
+          <p>Learning a new game framework by building a space shooter.</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
