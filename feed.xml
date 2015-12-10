@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 10 Dec 2015 00:14:31 -0800</pubDate>
-    <lastBuildDate>Thu, 10 Dec 2015 00:14:31 -0800</lastBuildDate>
+    <pubDate>Thu, 10 Dec 2015 00:32:24 -0800</pubDate>
+    <lastBuildDate>Thu, 10 Dec 2015 00:32:24 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -37,7 +37,7 @@ with text.&lt;/li&gt;
   &lt;li&gt;Object pooling on the bullets the player can shoot, as well as the enemy.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;I think this will be enough to showcase several of Kha’s features, and
+&lt;p&gt;I think this will be enough to showcase several of Kha’s features and
 allow for further expansion. This tutorial will be built in a somewhat
 naive fashion - we are mostly trying to provide a starting point for
 making a game in Kha. Refactoring into a solid code-base is left as an
@@ -64,7 +64,7 @@ tools it uses. You shouldn’t have to mess with this.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h4 id=&quot;khafilejs&quot;&gt;khafile.js&lt;/h4&gt;
-&lt;p&gt;Let’s open up khafile.js, get rid of everything and replace it with
+&lt;p&gt;Let’s open up khafile.js and get rid of everything and replace it with
 the following:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;project&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Project&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;KhaShmup&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
@@ -78,7 +78,7 @@ project to use the files found in the Sources directory. Let’s check
 out that directory now.&lt;/p&gt;
 
 &lt;p&gt;In Sources we find two files - Empty.hx, and Main.hx. Main is the
-entry point for the program, and Empty is the “game.” We can get rid
+entry point for the program and Empty is the “game.” We can get rid
 of this as we’ll be using a class for our own game.&lt;/p&gt;
 
 &lt;h4 id=&quot;mainhx&quot;&gt;Main.hx&lt;/h4&gt;
@@ -100,13 +100,13 @@ of this as we’ll be using a class for our own game.&lt;/p&gt;
   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This class has an entry point main, which initializes Kha’s system,
+&lt;p&gt;This class has an entry point main which initializes Kha’s system,
 sets the window name as “KhaShmup”, the width of the window to 800,
 the height to 600, and provides a callback of the function init once
 the System is ready to go.&lt;/p&gt;
 
-&lt;p&gt;The callback is where we create an instance of our game, and we tell
-the system that when it renders, we want to call our game’s render
+&lt;p&gt;The callback is where we create an instance of our game and we tell
+the system that when it renders we want to call our game’s render
 method.&lt;/p&gt;
 
 &lt;h4 id=&quot;khashmuphx&quot;&gt;KhaShmup.hx&lt;/h4&gt;
@@ -152,10 +152,10 @@ following lines to it:&lt;/p&gt;
 buffer” - this allows us to use
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Multiple_buffering&quot;&gt;double buffering&lt;/a&gt;
 so that we draw to a “back” buffer - one that is not rendered to the
-screen yet, and when it becomes time to do so, we just swap the
+screen yet, and when it becomes time to do so we just swap the
 currently rendered buffer with our back buffer.&lt;/p&gt;
 
-&lt;p&gt;In the render method, we recieve a framebuffer - the currently
+&lt;p&gt;In the render method we recieve a framebuffer - the currently
 rendered buffer. We then get a member “g2” from our backbuffer. This
 is an instance of the
 &lt;a href=&quot;https://github.com/KTXSoftware/Kha/blob/master/Sources/kha/graphics2/Graphics.hx&quot;&gt;graphics2 api&lt;/a&gt;
@@ -175,7 +175,7 @@ batch draw operations where possible, providing pretty great rendering
 performance.&lt;/p&gt;
 
 &lt;h4 id=&quot;running-the-application&quot;&gt;Running the application&lt;/h4&gt;
-&lt;p&gt;There are a number of different ways you can run a Kha application,
+&lt;p&gt;There are a number of different ways you can run a Kha application
 but the way that I typically do is to navigate to the root of the project
 directory and to run the following:&lt;/p&gt;
 
@@ -183,7 +183,7 @@ directory and to run the following:&lt;/p&gt;
 node Kha/make --server
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This will compile the html5 target, and then serve it on
+&lt;p&gt;This will compile the html5 target and then serve it on
 localhost:8080. If you go there you should see a big purple screen.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/HelloPurpleScreen.png&quot; alt=&quot;Hello, Purple Screen&quot; /&gt;&lt;/p&gt;
@@ -194,16 +194,16 @@ repo:&lt;/p&gt;
 &lt;p&gt;&lt;a href=&quot;https://github.com/jamiltron/KhaShmup/tree/part-1&quot;&gt;https://github.com/jamiltron/KhaShmup/tree/part-1&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;An interesting thing about the build system is that Kha will generate
-projects for your targeted platform. For example, if I wanted an XCode
+projects for your targeted platform. For example if I wanted an XCode
 project for OSX, running&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;
 node Kha/make osx
 &lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;would build an XCode project in the build directory, which I then
-could open up in XCode, allowing me to use all the tools associated
-with that platform. That’s a pretty cool feature, as sometimes
+&lt;p&gt;would build an XCode project in the build directory.  I then
+could open up in XCode allowing me to use all the tools associated
+with that platform. That’s a pretty cool feature as sometimes
 tracking down issues in the output of compiled Haxe code from the
 terminal can be pretty frustrating. However if I want to quickly
 compile and run natively for osx, I could just run&lt;/p&gt;
@@ -231,6 +231,8 @@ in part 2.&lt;/p&gt;
         <category>game-dev</category>
         
         <category>kha</category>
+        
+        <category>khashmup</category>
         
         <category>haxe</category>
         

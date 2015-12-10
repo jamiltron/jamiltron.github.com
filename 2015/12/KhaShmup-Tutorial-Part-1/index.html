@@ -58,6 +58,8 @@
   
   <a href="/categories/kha">kha</a>, 
   
+  <a href="/categories/khashmup">khashmup</a>, 
+  
   <a href="/categories/haxe">haxe</a>, 
   
   <a href="/categories/tutorial">tutorial</a>
@@ -92,7 +94,7 @@ with text.</li>
   <li>Object pooling on the bullets the player can shoot, as well as the enemy.</li>
 </ul>
 
-<p>I think this will be enough to showcase several of Kha’s features, and
+<p>I think this will be enough to showcase several of Kha’s features and
 allow for further expansion. This tutorial will be built in a somewhat
 naive fashion - we are mostly trying to provide a starting point for
 making a game in Kha. Refactoring into a solid code-base is left as an
@@ -119,7 +121,7 @@ tools it uses. You shouldn’t have to mess with this.</li>
 </ul>
 
 <h4 id="khafilejs">khafile.js</h4>
-<p>Let’s open up khafile.js, get rid of everything and replace it with
+<p>Let’s open up khafile.js and get rid of everything and replace it with
 the following:</p>
 
 <div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaShmup&#39;</span><span class="p">);</span>
@@ -133,7 +135,7 @@ project to use the files found in the Sources directory. Let’s check
 out that directory now.</p>
 
 <p>In Sources we find two files - Empty.hx, and Main.hx. Main is the
-entry point for the program, and Empty is the “game.” We can get rid
+entry point for the program and Empty is the “game.” We can get rid
 of this as we’ll be using a class for our own game.</p>
 
 <h4 id="mainhx">Main.hx</h4>
@@ -155,13 +157,13 @@ of this as we’ll be using a class for our own game.</p>
   <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
-<p>This class has an entry point main, which initializes Kha’s system,
+<p>This class has an entry point main which initializes Kha’s system,
 sets the window name as “KhaShmup”, the width of the window to 800,
 the height to 600, and provides a callback of the function init once
 the System is ready to go.</p>
 
-<p>The callback is where we create an instance of our game, and we tell
-the system that when it renders, we want to call our game’s render
+<p>The callback is where we create an instance of our game and we tell
+the system that when it renders we want to call our game’s render
 method.</p>
 
 <h4 id="khashmuphx">KhaShmup.hx</h4>
@@ -207,10 +209,10 @@ following lines to it:</p>
 buffer” - this allows us to use
 <a href="https://en.wikipedia.org/wiki/Multiple_buffering">double buffering</a>
 so that we draw to a “back” buffer - one that is not rendered to the
-screen yet, and when it becomes time to do so, we just swap the
+screen yet, and when it becomes time to do so we just swap the
 currently rendered buffer with our back buffer.</p>
 
-<p>In the render method, we recieve a framebuffer - the currently
+<p>In the render method we recieve a framebuffer - the currently
 rendered buffer. We then get a member “g2” from our backbuffer. This
 is an instance of the
 <a href="https://github.com/KTXSoftware/Kha/blob/master/Sources/kha/graphics2/Graphics.hx">graphics2 api</a>
@@ -230,7 +232,7 @@ batch draw operations where possible, providing pretty great rendering
 performance.</p>
 
 <h4 id="running-the-application">Running the application</h4>
-<p>There are a number of different ways you can run a Kha application,
+<p>There are a number of different ways you can run a Kha application
 but the way that I typically do is to navigate to the root of the project
 directory and to run the following:</p>
 
@@ -238,7 +240,7 @@ directory and to run the following:</p>
 node Kha/make --server
 </code></pre>
 
-<p>This will compile the html5 target, and then serve it on
+<p>This will compile the html5 target and then serve it on
 localhost:8080. If you go there you should see a big purple screen.</p>
 
 <p><img src="/images/HelloPurpleScreen.png" alt="Hello, Purple Screen" /></p>
@@ -249,16 +251,16 @@ repo:</p>
 <p><a href="https://github.com/jamiltron/KhaShmup/tree/part-1">https://github.com/jamiltron/KhaShmup/tree/part-1</a></p>
 
 <p>An interesting thing about the build system is that Kha will generate
-projects for your targeted platform. For example, if I wanted an XCode
+projects for your targeted platform. For example if I wanted an XCode
 project for OSX, running</p>
 
 <p><code>
 node Kha/make osx
 </code></p>
 
-<p>would build an XCode project in the build directory, which I then
-could open up in XCode, allowing me to use all the tools associated
-with that platform. That’s a pretty cool feature, as sometimes
+<p>would build an XCode project in the build directory.  I then
+could open up in XCode allowing me to use all the tools associated
+with that platform. That’s a pretty cool feature as sometimes
 tracking down issues in the output of compiled Haxe code from the
 terminal can be pretty frustrating. However if I want to quickly
 compile and run natively for osx, I could just run</p>
