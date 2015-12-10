@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 10 Dec 2015 00:32:24 -0800</pubDate>
-    <lastBuildDate>Thu, 10 Dec 2015 00:32:24 -0800</lastBuildDate>
+    <pubDate>Thu, 10 Dec 2015 00:33:54 -0800</pubDate>
+    <lastBuildDate>Thu, 10 Dec 2015 00:33:54 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -180,7 +180,7 @@ but the way that I typically do is to navigate to the root of the project
 directory and to run the following:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;node Kha/make html5     
-node Kha/make --server
+node Kha/make --serve
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This will compile the html5 target and then serve it on
