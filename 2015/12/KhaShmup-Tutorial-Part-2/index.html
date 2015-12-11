@@ -213,6 +213,14 @@ everything is loaded we call our loadingFinished method.</p>
 <p>This loadingFinished callback sets an initialized flag to true, we
 load the ship’s image, and instantiate the ship.</p>
 
+<p>You may be wondering about the Std.int calls in the ship’s
+initialization. Std.int(x / y) will perform integer division on
+platforms that support that. In Kha we are don’t have to align images
+to whole integer positions, but when an image is not on whole images a
+different filtering method may be used. In my case I found that this
+often resulted in visual artifacts of blurriness, so whenever I can I
+keep images on whole integer positions.</p>
+
 <p>The call to Assets.images.playerShip may seem odd, but essentially Kha
 is running a macro to generate this accessor based on the image in our
 Assets directory, so once Kha has loaded all of the assets, we can
