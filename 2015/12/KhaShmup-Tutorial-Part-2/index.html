@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-2">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 2 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 2</h1>
+  <p class="text-muted">09 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/khashmup">khashmup</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-2">Kha Shmup Tutorial Part 2</h3>
+
+<p><a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-1/">Last time</a> we
+started up a Kha program and got a nice purple screen rendering. This
+time we will be displaying a sprite representing the player.</p>
+
+<h4 id="shiphx">Ship.hx</h4>
+<p>Create a new file named Ship.hx in the Sources directory and fill it
+up like so:</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Ship</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">var</span> image<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> x<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> y<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This should be fairly straight-forward - its a class containing an
+image, and a 2d position. It also contains a render function - taking
+in a
+<a href="https://github.com/KTXSoftware/Kha/blob/master/Sources/kha/graphics2/Graphics.hx">graphics2</a>
+instance and draws the Ship’s image using it. Note that we do not call
+begin or end on g, we will be calling this outside of this class. Now
+we have to load the ship’s image asset.</p>
+
+<h4 id="assets-and-khafilejs">Assets and khafile.js</h4>
+<p>Go into the khafile.js project file and make sure it looks like this:</p>
+
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaShmup&#39;</span><span class="p">);</span>
+
+<span class="nx">project</span><span class="p">.</span><span class="nx">addAssets</span><span class="p">(</span><span class="s1">&#39;Assets/**&#39;</span><span class="p">);</span>
+<span class="nx">project</span><span class="p">.</span><span class="nx">addSources</span><span class="p">(</span><span class="s1">&#39;Sources&#39;</span><span class="p">);</span>
+
+<span class="k">return</span> <span class="nx">project</span><span class="p">;</span></code></pre></div>
+
+<p>The only change is adding an assets directory. Now make sure to create
+this directory in the root of the project, and add an image to it name
+playerShip.png. I am using one of the ships from
+<a href="http://kenney.nl/assets">Kenny.nl’s game asset pack</a>, which is a
+great collection of assets for several genres of games. I am using the
+following ship:</p>
+
+<p><img src="/images/playerShip.png" alt="Player Ship" /></p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+<p>We need to make a few changes to KhaShmup.hx to load the assets and to
+initialize our ship:</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Assets</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Color</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Framebuffer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Scaler</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">System</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">KhaShmup</span> <span class="p">{</span>
+
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">var</span> bgColor <span class="o">=</span> <span class="n">Color</span><span class="p">.</span><span class="n">fromValue</span><span class="p">(</span><span class="mh">0x26004d</span><span class="p">);</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> screenWidth <span class="o">=</span> <span class="mi">800</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> screenHeight <span class="o">=</span> <span class="mi">600</span><span class="p">;</span>
+
+  <span class="kd">private</span> <span class="kd">var</span> backbuffer<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> initialized <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> ship<span class="p">:</span> <span class="n">Ship</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">Assets</span><span class="p">.</span><span class="n">loadEverything</span><span class="p">(</span><span class="n">loadingFinished</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">loadingFinished</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">initialized</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="c1">// create a buffer to draw to</span>
+    <span class="n">backbuffer</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="n">createRenderTarget</span><span class="p">(</span><span class="n">screenWidth</span><span class="p">,</span> <span class="n">screenHeight</span><span class="p">);</span>
+
+    <span class="c1">// create our player</span>
+    <span class="kd">var</span> shipImg <span class="o">=</span> <span class="n">Assets</span><span class="p">.</span><span class="n">images</span><span class="p">.</span><span class="n">playerShip</span><span class="p">;</span>
+    <span class="n">ship</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Ship</span><span class="p">(</span><span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">shipImg</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">shipImg</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">shipImg</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">framebuffer</span><span class="p">:</span> <span class="n">Framebuffer</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">initialized</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> g <span class="o">=</span> <span class="n">backbuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">;</span>
+
+    <span class="c1">// clear and draw to our backbuffer</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">bgColor</span><span class="p">);</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+
+    <span class="c1">// draw our backbuffer onto the active framebuffer</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+    <span class="n">Scaler</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="n">backbuffer</span><span class="p">,</span> <span class="n">framebuffer</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">screenRotation</span><span class="p">);</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Let’s go over the changes.</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kd">public</span> <span class="kd">function</span> <span class="err">new</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">Assets</span><span class="p">.</span><span class="n">loadEverything</span><span class="p">(</span><span class="n">loadingFinished</span><span class="p">);</span>
+  <span class="p">}</span></code></pre></div>
+
+<p>When we initialize our game, we now tell Kha’s Asset system to load
+everything (which is only one image at the moment), and once
+everything is loaded we call our loadingFinished method.</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kd">private</span> <span class="kd">function</span> <span class="nf">loadingFinished</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">initialized</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="c1">// create a buffer to draw to</span>
+    <span class="n">backbuffer</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="n">createRenderTarget</span><span class="p">(</span><span class="n">screenWidth</span><span class="p">,</span> <span class="n">screenHeight</span><span class="p">);</span>
+
+    <span class="c1">// create our player</span>
+    <span class="kd">var</span> shipImg <span class="o">=</span> <span class="n">Assets</span><span class="p">.</span><span class="n">images</span><span class="p">.</span><span class="n">playerShip</span><span class="p">;</span>
+    <span class="n">ship</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Ship</span><span class="p">(</span><span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">shipImg</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">shipImg</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">shipImg</span><span class="p">);</span>
+  <span class="p">}</span></code></pre></div>
+
+<p>This loadingFinished callback sets an initialized flag to true, we
+load the ship’s image, and instantiate the ship.</p>
+
+<p>The call to Assets.images.playerShip may seem odd, but essentially Kha
+is running a macro to generate this accessor based on the image in our
+Assets directory, so once Kha has loaded all of the assets, we can
+grab any image (or sound, etc) using this format.</p>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">framebuffer</span><span class="p">:</span> <span class="n">Framebuffer</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">initialized</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> g <span class="o">=</span> <span class="n">backbuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">;</span>
+
+    <span class="c1">// clear and draw to our backbuffer</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">bgColor</span><span class="p">);</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+
+    <span class="c1">// draw our backbuffer onto the active framebuffer</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+    <span class="n">Scaler</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="n">backbuffer</span><span class="p">,</span> <span class="n">framebuffer</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">screenRotation</span><span class="p">);</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+  <span class="p">}</span></code></pre></div>
+
+<p>The major difference here is that we are checking our initialized flag
+to make sure we have loaded the assets we are intending to render. The
+other change is that we make the call to the ship’s render method,
+providing it a graphics instance.</p>
+
+<h4 id="running-the-application">Running the application</h4>
+<p>Now when you run the application you should be seeing this:</p>
+
+<p><img src="/images/part2.png" alt="Part 2" /></p>
+
+<p>If you do not, check out part-2 of my branch.</p>
+
+<p><a href="https://github.com/jamiltron/KhaShmup/tree/part-2">https://github.com/jamiltron/KhaShmup/tree/part-2</a></p>
+
+<h4 id="in-summary">In Summary</h4>
+<p>We loaded up some assets and rendered an image representing the
+player. In part 3 we will learn how to use keyboard as input and we
+will get the player moving around the screen.    </p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (13)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-1">Kha Shmup Tutorial Part 1</a></h2>
+          <p>Hello, purple window.</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
