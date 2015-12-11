@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 11 Dec 2015 00:13:27 -0800</pubDate>
-    <lastBuildDate>Fri, 11 Dec 2015 00:13:27 -0800</lastBuildDate>
+    <pubDate>Fri, 11 Dec 2015 00:19:58 -0800</pubDate>
+    <lastBuildDate>Fri, 11 Dec 2015 00:19:58 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -198,7 +198,7 @@ providing it a graphics instance.&lt;/p&gt;
 player. In part 3 we will learn how to use keyboard as input and we
 will get the player moving around the screen.    &lt;/p&gt;
 </description>
-        <pubDate>Wed, 09 Dec 2015 00:00:00 -0800</pubDate>
+        <pubDate>Thu, 10 Dec 2015 00:00:00 -0800</pubDate>
         <link>http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-2</link>
         <guid isPermaLink="true">http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-2</guid>
         
