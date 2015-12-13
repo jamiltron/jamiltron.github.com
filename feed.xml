@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 11 Dec 2015 08:14:59 -0800</pubDate>
-    <lastBuildDate>Fri, 11 Dec 2015 08:14:59 -0800</lastBuildDate>
+    <pubDate>Sun, 13 Dec 2015 08:33:35 -0800</pubDate>
+    <lastBuildDate>Sun, 13 Dec 2015 08:33:35 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -394,7 +394,7 @@ but the way that I typically do is to navigate to the root of the project
 directory and to run the following:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;node Kha/make html5     
-node Kha/make --serve
+node Kha/make --server
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This will compile the html5 target and then serve it on
@@ -432,7 +432,7 @@ node Kha/make osx --run
 &lt;p&gt;I know it seems like we haven’t gotten that far, but getting all of
 the required software and spinning up a project will be a good
 starting point for rendering an image on screen, which we will get to
-in part 2.&lt;/p&gt;
+in &lt;a href=&quot;http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-2/&quot;&gt;part 2&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Thank you for reading!&lt;/p&gt;
 
