@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 14 Dec 2015 19:31:08 -0800</pubDate>
-    <lastBuildDate>Mon, 14 Dec 2015 19:31:08 -0800</lastBuildDate>
+    <pubDate>Mon, 14 Dec 2015 19:33:58 -0800</pubDate>
+    <lastBuildDate>Mon, 14 Dec 2015 19:33:58 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -305,7 +305,7 @@ and our controls.&lt;/p&gt;
 
 &lt;p&gt;Secondly, in loadingFinished we make a call to Keyboard.get().notify,
 and we provide two methods we define at the bottom of this file -
-onKeyDown and onKeyUp. This is registering our methods to Kha’s input
+keyDown and keyUp. This is registering our methods to Kha’s input
 system, so that when the keyboard has a key up or key down, the
 appropriate method gets called. These are where we update our Controls
 instance.&lt;/p&gt;
