@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 14 Dec 2015 19:33:58 -0800</pubDate>
-    <lastBuildDate>Mon, 14 Dec 2015 19:33:58 -0800</lastBuildDate>
+    <pubDate>Tue, 15 Dec 2015 19:47:54 -0800</pubDate>
+    <lastBuildDate>Tue, 15 Dec 2015 19:47:54 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -124,7 +124,8 @@ file named Controls.hx:&lt;/p&gt;
 
 &lt;p&gt;This class is pretty much just two big switches to swap four different
 flags - each flag represents a possible button, and depending on the
-Key passed to either switch, we update the flag.&lt;/p&gt;
+Key passed to either switch, we update the flag. We’ll see more about
+keys in a bit.&lt;/p&gt;
 
 &lt;p&gt;We will be using these classes in our main game class, but let’s
 update our Ship first to take into account controls and time, and
@@ -308,7 +309,14 @@ and we provide two methods we define at the bottom of this file -
 keyDown and keyUp. This is registering our methods to Kha’s input
 system, so that when the keyboard has a key up or key down, the
 appropriate method gets called. These are where we update our Controls
-instance.&lt;/p&gt;
+instance. Note that both of these methods take a Key - which is an
+enum saying what &lt;em&gt;kind&lt;/em&gt; of key is pressed - in this key we are caring
+only about specific directional keys, but this could also be something
+like the Shift key, or even a character key. This leads to the second
+parameter of these methods - the String value. Kha sends character
+keys such as the “A” key as a String. I think this is somewhat of a
+weird decision, as I would have much preferred the traditional
+keycode, but this is how Kha was built.&lt;/p&gt;
 
 &lt;p&gt;At the end of our render method we also make a call to update, and
 here is where we update both the timer as well as the ship. We pass
@@ -540,7 +548,7 @@ providing it a graphics instance.&lt;/p&gt;
 
 &lt;h4 id=&quot;in-summary&quot;&gt;In Summary&lt;/h4&gt;
 &lt;p&gt;We loaded up some assets and rendered an image representing the
-player. In part 3 we will learn how to use keyboard as input and we
+player. In &lt;a href=&quot;http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-3/&quot;&gt;part 3&lt;/a&gt; we will learn how to use keyboard as input and we
 will get the player moving around the screen.    &lt;/p&gt;
 </description>
         <pubDate>Thu, 10 Dec 2015 00:00:00 -0800</pubDate>
