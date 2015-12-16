@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-4">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 4 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 4</h1>
+  <p class="text-muted">15 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/khashmup">khashmup</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-4">Kha Shmup Tutorial Part 4</h3>
+
+<p><a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-3/">Previously on KhaSmup</a>
+we added keyboard support and limited the ship to only be pilotable on
+the visible screen. In this tutorial we are going to add the ability
+to shoot as well as the sounds of the shot. First thing we have to do
+is add a bullet.</p>
+
+<h4 id="bullethx">Bullet.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Bullet</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">var</span> image<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> x<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> y<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> speed<span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> isActive<span class="p">:</span> <span class="n">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+    <span class="n">activate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">activate</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+    <span class="n">isActive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">g</span><span class="p">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">y</span> <span class="o">-=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Most of this should be pretty obvious - it shows a lot of similarity
+to the Ship. The major difference is we have an isActive field. You
+may be wondering what this is for - let’s take a look at Gun.hx, which
+is what we will be using to manage these bullets:</p>
+
+<h4 id="gunhx">Gun.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Sound</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">audio1</span><span class="p">.</span><span class="nn">Audio</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Gun</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">var</span> bulletImage<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> bulletSound<span class="p">:</span> <span class="n">Sound</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> shotInterval<span class="p">:</span> <span class="n">Float</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> cooldownLeft<span class="p">:</span> <span class="n">Float</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> bullets<span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Bullet</span><span class="p">&gt;;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">shotInterval</span><span class="p">:</span> <span class="n">Float</span><span class="p">,</span> <span class="n">bulletImage</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">bulletSound</span><span class="p">:</span> <span class="n">Sound</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">shotInterval</span> <span class="o">=</span> <span class="n">shotInterval</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">bulletImage</span> <span class="o">=</span> <span class="n">bulletImage</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">bulletSound</span> <span class="o">=</span> <span class="n">bulletSound</span><span class="p">;</span>
+    <span class="n">cooldownLeft</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">bullets</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Bullet</span><span class="p">&gt;();</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">shoot</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">cooldownLeft</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">Audio</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">bulletSound</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+      <span class="n">cooldownLeft</span> <span class="o">=</span> <span class="n">shotInterval</span><span class="p">;</span>
+      <span class="kd">var</span> adjX<span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">bulletImage</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+
+      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">bullets</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">activate</span><span class="p">(</span><span class="n">adjX</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+          <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="n">bullets</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="k">new</span> <span class="n">Bullet</span><span class="p">(</span><span class="n">adjX</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bulletImage</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">cooldownLeft</span> <span class="o">-=</span> <span class="n">deltaTime</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">cooldownLeft</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">cooldownLeft</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">bullets</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> bullet <span class="o">=</span> <span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+      <span class="n">bullet</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">bullet</span><span class="p">.</span><span class="n">isActive</span> <span class="o">&amp;&amp;</span> <span class="n">bullet</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">bulletImage</span><span class="p">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">bullets</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This class is has a few new features. For one, it uses a countdown
+feature - we have a shotInterval variable that defines how long in
+seconds we wait between two shots. When the user shoots, we check if
+the cooldownLeft is at zero, and if it is - we set it to the interval
+, create a bullet, and play a sound. This sound is played by calling
+Audio.play, which is how we can interface with Kha’s audio1 api.</p>
+
+<p>The bullet creation may look a little interesting - we have an array,
+and when we create a bullet we iterate through this array looking for
+an inactive bullet, and if we don’t find one - we create a new one. If
+we do happen to find an inactive bulelt we just use the inactive one
+and we activate it.</p>
+
+<p>This is a very naive form of
+<a href="https://en.wikipedia.org/wiki/Object_pool_pattern">object pooling</a>.
+The idea behind pooling is that sometimes object initialization is
+costly, so we decide to limit this cost by keeping around already
+initialized objects. This can also help out with languages that have
+garbage collection such as Haxe. Garbage collection is a great tool,
+but it can sometimes hamper the experience of games - causing a spike
+in lag as unused objects are cleaned up. By pooling we still hold onto
+references of objects, preventing them from being collected until we
+no longer hold a reference to the pool AND the object.</p>
+
+<p>Objects that are good candidates for pooling are those that you tend
+to create and destroy a whole lot - like these bullets. Generally you
+will want to profile your game (using a tool such as
+<a href="http://hxscout.com/">hxScout</a>) before you commit to pooling - as
+holding a ton of objects in memory has its own downsides.</p>
+
+<p>There are much more general implementations of pools out there - and
+you will probably want to use something a little stronger if you start
+making a bigger game, but this implementation was chosen to be
+demonstrative and to introduce the concept if you’ve never seen it.</p>
+
+<p>Note that we have the bullet coming right out of the gun - but
+obviously you can change this up and make the gun cooler by having two
+bullets shoot, or even something crazier.</p>
+
+<p>Now that we have our gun, let’s add it to our ship:</p>
+
+<h4 id="shiphx">Ship.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Ship</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">var</span> image<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> gun<span class="p">:</span> <span class="n">Gun</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> gunOffsetY <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> x<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> y<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> width<span class="p">(</span><span class="k">get</span><span class="p">,</span> <span class="k">null</span><span class="p">):</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> height<span class="p">(</span><span class="k">get</span><span class="p">,</span> <span class="k">null</span><span class="p">):</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> speed <span class="o">=</span> <span class="mf">300.0</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">attachGun</span><span class="p">(</span><span class="n">gun</span><span class="p">:</span> <span class="n">Gun</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">gun</span> <span class="o">=</span> <span class="n">gun</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nf">get_width</span><span class="p">():</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nf">get_height</span><span class="p">():</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">gun</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">gun</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">controls</span><span class="p">:</span> <span class="n">Controls</span><span class="p">,</span> <span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">controls</span><span class="p">.</span><span class="n">left</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">controls</span><span class="p">.</span><span class="n">right</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">x</span> <span class="o">-=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">controls</span><span class="p">.</span><span class="n">right</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">controls</span><span class="p">.</span><span class="n">left</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">x</span> <span class="o">+=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">controls</span><span class="p">.</span><span class="n">up</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">controls</span><span class="p">.</span><span class="n">down</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">y</span> <span class="o">-=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">controls</span><span class="p">.</span><span class="n">down</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">controls</span><span class="p">.</span><span class="n">up</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">y</span> <span class="o">+=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">gun</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">controls</span><span class="p">.</span><span class="n">shoot</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">gun</span><span class="p">.</span><span class="n">shoot</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">y</span> <span class="o">-</span> <span class="n">gunOffsetY</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="n">gun</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span> 
+<span class="p">}</span></code></pre></div>
+
+<p>The gun gets inserted in pretty much as is, the only major difference
+is that we check if this gun is null before rendering it or shooting
+it. This allows us to instantiate ships without guns.</p>
+
+<p>Obviously we have to update our controls.</p>
+
+<h4 id="controlshx">Controls.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Key</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Controls</span> <span class="p">{</span>
+  <span class="kd">public</span> <span class="kd">var</span> left<span class="p">:</span> <span class="n">Bool</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> right<span class="p">:</span> <span class="n">Bool</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> up<span class="p">:</span> <span class="n">Bool</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> down<span class="p">:</span> <span class="n">Bool</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> shoot<span class="p">:</span> <span class="n">Bool</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">()</span> <span class="p">{}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">keyDown</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="k">switch</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">LEFT</span><span class="p">:</span>
+      <span class="n">left</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">RIGHT</span><span class="p">:</span>
+      <span class="n">right</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">UP</span><span class="p">:</span>
+      <span class="n">up</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">DOWN</span><span class="p">:</span>
+      <span class="n">down</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">CHAR</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">shoot</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="k">default</span><span class="p">:</span>
+      <span class="c1">// no-op</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">keyUp</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="k">switch</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">LEFT</span><span class="p">:</span>
+      <span class="n">left</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">RIGHT</span><span class="p">:</span>
+      <span class="n">right</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">UP</span><span class="p">:</span>
+      <span class="n">up</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">DOWN</span><span class="p">:</span>
+      <span class="n">down</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">CHAR</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">shoot</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="k">default</span><span class="p">:</span>
+      <span class="c1">//no-op</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The addition here is that we add a new switch case to both methods
+checking for CHAR, which is the key type representing a character. Now
+this gets into the kind-of weird part of Kha sending a char key’s
+value as a string - we have to then check the value in a
+sub-condition. Not exactly how I would have chosen to do this, but it
+works.</p>
+
+<p>Let’s wrap this up by updating KhaShmup:</p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Assets</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Color</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Framebuffer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Key</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Scaler</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">System</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">input</span><span class="p">.</span><span class="nn">Keyboard</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">KhaShmup</span> <span class="p">{</span>
+
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">var</span> bgColor <span class="o">=</span> <span class="n">Color</span><span class="p">.</span><span class="n">fromValue</span><span class="p">(</span><span class="mh">0x26004d</span><span class="p">);</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> screenWidth <span class="o">=</span> <span class="mi">800</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> screenHeight <span class="o">=</span> <span class="mi">600</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> gunSpeed <span class="o">=</span> <span class="mf">0.25</span><span class="p">;</span>
+
+  <span class="kd">private</span> <span class="kd">var</span> backbuffer<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> controls<span class="p">:</span> <span class="n">Controls</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> initialized <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> ship<span class="p">:</span> <span class="n">Ship</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> timer<span class="p">:</span> <span class="n">Timer</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">Assets</span><span class="p">.</span><span class="n">loadEverything</span><span class="p">(</span><span class="n">loadingFinished</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">loadingFinished</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">initialized</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="c1">// create a buffer to draw to</span>
+    <span class="n">backbuffer</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="n">createRenderTarget</span><span class="p">(</span><span class="n">screenWidth</span><span class="p">,</span> <span class="n">screenHeight</span><span class="p">);</span>
+
+    <span class="c1">// create our player</span>
+    <span class="kd">var</span> shipImg <span class="o">=</span> <span class="n">Assets</span><span class="p">.</span><span class="n">images</span><span class="p">.</span><span class="n">playerShip</span><span class="p">;</span>
+    <span class="n">ship</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Ship</span><span class="p">(</span><span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">shipImg</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">shipImg</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">shipImg</span><span class="p">);</span>
+    <span class="n">controls</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Controls</span><span class="p">();</span>
+    <span class="n">timer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Timer</span><span class="p">();</span>
+    <span class="n">Keyboard</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">notify</span><span class="p">(</span><span class="n">keyDown</span><span class="p">,</span> <span class="n">keyUp</span><span class="p">);</span>
+    <span class="n">setupShip</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">framebuffer</span><span class="p">:</span> <span class="n">Framebuffer</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">initialized</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> g <span class="o">=</span> <span class="n">backbuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">;</span>
+
+    <span class="c1">// clear and draw to our backbuffer</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">bgColor</span><span class="p">);</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+
+    <span class="c1">// draw our backbuffer onto the active framebuffer</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+    <span class="n">Scaler</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="n">backbuffer</span><span class="p">,</span> <span class="n">framebuffer</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">screenRotation</span><span class="p">);</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+
+    <span class="n">update</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">setupShip</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">ship</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Ship</span><span class="p">(</span><span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">Assets</span><span class="p">.</span><span class="n">images</span><span class="p">.</span><span class="n">playerShip</span><span class="p">);</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">attachGun</span><span class="p">(</span><span class="k">new</span> <span class="n">Gun</span><span class="p">(</span><span class="n">gunSpeed</span><span class="p">,</span> <span class="n">Assets</span><span class="p">.</span><span class="n">images</span><span class="p">.</span><span class="n">bullet</span><span class="p">,</span> <span class="n">Assets</span><span class="p">.</span><span class="n">sounds</span><span class="p">.</span><span class="n">bulletShoot</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">timer</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+    <span class="n">updateShip</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">updateShip</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">timer</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">);</span>
+
+    <span class="c1">// limit the ship to the width of the screen</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">ship</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">ship</span><span class="p">.</span><span class="n">width</span> <span class="o">&gt;</span> <span class="n">screenWidth</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">ship</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">screenWidth</span> <span class="o">-</span> <span class="n">ship</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// limit the ship to the height of the screen</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">ship</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">ship</span><span class="p">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="n">screenHeight</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">ship</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">screenHeight</span> <span class="o">-</span> <span class="n">ship</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">keyDown</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">String</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">controls</span><span class="p">.</span><span class="n">keyDown</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">keyUp</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">String</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">controls</span><span class="p">.</span><span class="n">keyUp</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Almost the exact same as before, aside from the instantiation of the
+Gun and attaching it to the Ship. Also we grab the bullet.wav sound
+out of the assets. For that you should go to
+<a href="http://www.bfxr.net/">bfxr.net</a>, create a sound you enjoy, then
+export it as a wav file to your Assets folder, and adjust the name to
+“bulletShoot.wav”.</p>
+
+<h4 id="running-the-application">Running the Application</h4>
+<p>You’ll now be able to move the ship, and when you hit the z button
+you’ll shoot a bullet out.</p>
+
+<p><img src="/images/khaShmup4.gif" alt="Lasers" /></p>
+
+<p>If you don’t see this, check out my part-4 branch:</p>
+
+<p><a href="https://github.com/jamiltron/KhaShmup/tree/part-4">https://github.com/jamiltron/KhaShmup/tree/part-4</a></p>
+
+<h4 id="in-summary">In Summary</h4>
+<p>We’re starting to see a game form piece-by-piece. We learned how to
+shoot, how to play a sound, and we learned a little bit about object
+pooling to delay initialization/garbage-collection costs. In part 5
+we’ll be adding some targets for the player to shoot.</p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (15)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-3">Kha Shmup Tutorial Part 3</a></h2>
+          <p>Move that ship!</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
