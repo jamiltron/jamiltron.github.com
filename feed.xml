@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 16 Dec 2015 20:41:24 -0800</pubDate>
-    <lastBuildDate>Wed, 16 Dec 2015 20:41:24 -0800</lastBuildDate>
+    <pubDate>Wed, 16 Dec 2015 20:44:17 -0800</pubDate>
+    <lastBuildDate>Wed, 16 Dec 2015 20:44:17 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -683,7 +683,7 @@ you’ll shoot a bullet out.&lt;/p&gt;
 &lt;h4 id=&quot;in-summary&quot;&gt;In Summary&lt;/h4&gt;
 &lt;p&gt;We’re starting to see a game form piece-by-piece. We learned how to
 shoot, how to play a sound, and we learned a little bit about object
-pooling to delay initialization/garbage-collection costs. In &lt;a href=&quot;http://0.0.0.0:4000/2015/12/KhaShmup-Tutorial-Part-5/&quot;&gt;part 5&lt;/a&gt;
+pooling to delay initialization/garbage-collection costs. In &lt;a href=&quot;http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-5/&quot;&gt;part 5&lt;/a&gt;
 we’ll be adding some targets for the player to shoot.&lt;/p&gt;
 </description>
         <pubDate>Tue, 15 Dec 2015 00:00:00 -0800</pubDate>
