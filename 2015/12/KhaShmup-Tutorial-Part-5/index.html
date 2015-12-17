@@ -180,7 +180,7 @@ you’d want to clean up for a more complex game.</p>
   <span class="p">}</span>
 
   <span class="kd">private</span> <span class="kd">function</span> <span class="nf">generateRandomX</span><span class="p">(</span><span class="n">minSpawnX</span><span class="p">,</span> <span class="n">maxSpawnX</span><span class="p">):</span> <span class="n">Int</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">Std</span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="n">maxSpawnX</span> <span class="o">-</span> <span class="n">enemyImage</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="n">minSpawnX</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">Std</span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="n">maxSpawnX</span> <span class="o">-</span> <span class="n">minSpawnX</span><span class="p">)</span> <span class="o">+</span> <span class="n">minSpawnX</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="kd">private</span> <span class="kd">function</span> <span class="nf">spawn</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
@@ -200,7 +200,7 @@ you’d want to clean up for a more complex game.</p>
     <span class="k">if</span> <span class="p">(</span><span class="n">currentTime</span> <span class="o">&gt;=</span> <span class="n">spawnNextTime</span><span class="p">)</span> <span class="p">{</span>
       <span class="n">currentTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
       <span class="n">spawnNextTime</span> <span class="o">=</span> <span class="n">generateRandomSpawnTime</span><span class="p">(</span><span class="n">spawnMinTime</span><span class="p">,</span> <span class="n">spawnMaxTime</span><span class="p">);</span>
-      <span class="n">spawn</span><span class="p">(</span><span class="n">generateRandomX</span><span class="p">(</span><span class="n">minSpawnX</span><span class="p">,</span> <span class="n">maxSpawnX</span><span class="p">),</span> <span class="o">-</span><span class="n">enemyImage</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+      <span class="n">spawn</span><span class="p">(</span><span class="n">generateRandomX</span><span class="p">(</span><span class="n">minSpawnX</span><span class="p">,</span> <span class="n">maxSpawnX</span> <span class="o">-</span> <span class="n">enemyImage</span><span class="p">.</span><span class="n">width</span><span class="p">),</span> <span class="o">-</span><span class="n">enemyImage</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">enemies</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
