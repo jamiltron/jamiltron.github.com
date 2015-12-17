@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-5">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 5 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 5</h1>
+  <p class="text-muted">16 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/khashmup">khashmup</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-5">Kha Shmup Tutorial Part 5</h3>
+
+<p><a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-4/">We can now move and shoot</a>
+so let’s lay the foundation of providing something to shoot at.</p>
+
+<h4 id="enemyhx">Enemy.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Enemy</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">var</span> image<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> x<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> y<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> width<span class="p">(</span><span class="k">get</span><span class="p">,</span> <span class="k">null</span><span class="p">):</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> height<span class="p">(</span><span class="k">get</span><span class="p">,</span> <span class="k">null</span><span class="p">):</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> speed <span class="o">=</span> <span class="mf">200.0</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> isActive <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">get_width</span><span class="p">():</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">get_height</span><span class="p">():</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+    <span class="n">activate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">activate</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+    <span class="n">isActive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">y</span> <span class="o">+=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This enemy looks pretty similar - they are pretty much the same as
+bullets, and they share a lot of resemblance to the Ship. This is ok
+for our tutorial because we aren’t going to get too complicated, but
+this is probably the point where you will want to DRY up the code. DRY
+stands for “Don’t Repeat Yourself”, and means we want to stop
+duplicating the share it between the classes - you could do this with
+an base class they inherit from, or a component that these classes
+hold. I personally would use something like the
+<a href="http://www.ashframework.org/">Ash Entity-Component-System</a> from the
+start, but that’s somewhat outside of the scope of this tutorial and
+possibly a topic for a later date.</p>
+
+<p>As I said above this tutorial is pretty simple, and a little
+duplication won’t kill us, so I am leaving it as is, but this is one
+of the many “naive” parts of this tutorial I spoke about earlier that
+you’d want to clean up for a more complex game.</p>
+
+<p>Since we have an Enemy, let’s get a way to get them on screen:</p>
+
+<h4 id="enemyspawnerhx">EnemySpawner.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">EnemySpawner</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">var</span> minSpawnX<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> maxSpawnX<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> maxPositionY<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> enemyImage<span class="p">:</span> <span class="n">Image</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> spawnMinTime<span class="p">:</span> <span class="n">Float</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> spawnMaxTime<span class="p">:</span> <span class="n">Float</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> spawnNextTime<span class="p">:</span> <span class="n">Float</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> currentTime<span class="p">:</span> <span class="n">Float</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">var</span> enemies<span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Enemy</span><span class="p">&gt;;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">enemyImage</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">spawnMinTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">,</span> <span class="n">spawnMaxTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">,</span> 
+                      <span class="p">?</span><span class="n">minSpawnX</span><span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">maxSpawnX</span><span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">maxPositionY</span><span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">enemyImage</span> <span class="o">=</span> <span class="n">enemyImage</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">spawnMinTime</span> <span class="o">=</span> <span class="n">spawnMinTime</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">spawnMaxTime</span> <span class="o">=</span> <span class="n">spawnMaxTime</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">minSpawnX</span> <span class="o">=</span> <span class="n">minSpawnX</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">maxSpawnX</span> <span class="o">=</span> <span class="n">maxSpawnX</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">maxPositionY</span> <span class="o">=</span> <span class="n">maxPositionY</span><span class="p">;</span>
+    <span class="n">currentTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">enemies</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Enemy</span><span class="p">&gt;();</span>
+    <span class="n">spawnNextTime</span> <span class="o">=</span> <span class="n">generateRandomSpawnTime</span><span class="p">(</span><span class="n">spawnMinTime</span><span class="p">,</span> <span class="n">spawnMaxTime</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">generateRandomSpawnTime</span><span class="p">(</span><span class="n">minTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">,</span> <span class="n">maxTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">):</span> <span class="n">Float</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">minTime</span> <span class="o">+</span> <span class="n">Math</span><span class="p">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">maxTime</span> <span class="o">-</span> <span class="n">minTime</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">generateRandomX</span><span class="p">(</span><span class="n">minSpawnX</span><span class="p">,</span> <span class="n">maxSpawnX</span><span class="p">):</span> <span class="n">Int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">Std</span><span class="p">.</span><span class="n">random</span><span class="p">(</span><span class="n">maxSpawnX</span> <span class="o">-</span> <span class="n">enemyImage</span><span class="p">.</span><span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="n">minSpawnX</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">spawn</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">enemies</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">enemies</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">enemies</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">activate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+          <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+
+    <span class="n">enemies</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="k">new</span> <span class="n">Enemy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">enemyImage</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">currentTime</span> <span class="o">+=</span> <span class="n">deltaTime</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">currentTime</span> <span class="o">&gt;=</span> <span class="n">spawnNextTime</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">currentTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="n">spawnNextTime</span> <span class="o">=</span> <span class="n">generateRandomSpawnTime</span><span class="p">(</span><span class="n">spawnMinTime</span><span class="p">,</span> <span class="n">spawnMaxTime</span><span class="p">);</span>
+      <span class="n">spawn</span><span class="p">(</span><span class="n">generateRandomX</span><span class="p">(</span><span class="n">minSpawnX</span><span class="p">,</span> <span class="n">maxSpawnX</span><span class="p">),</span> <span class="o">-</span><span class="n">enemyImage</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">enemies</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> enemy <span class="o">=</span> <span class="n">enemies</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+      <span class="n">enemy</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">enemy</span><span class="p">.</span><span class="n">isActive</span> <span class="o">&amp;&amp;</span> <span class="n">enemy</span><span class="p">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">maxPositionY</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">enemy</span><span class="p">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">enemies</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">enemies</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Much like the Gun of last lesson - this is an object that basically
+holds and generates enemies, as well as performing some object pooling
+and positioning logic.</p>
+
+<p>We use two floats to determine when to spawn enemies - the minimum
+time we wait to spawn, and the maximum. We randomly select a float
+between these two, and then once the currentTime is equal to or
+greater than that, we spawn an enemy just above the screen, and
+between minSpawnX and maxSpawnX. You may notice two different random
+methods - Std.random(int) and Math.random(): Std.random(val) will
+return an integer between 0 and val whereas Math.random
+returns a float between 0 and 1.0. Because we are generating pure ints
+in the random position, and floats in the time we use these two
+different methods, but if you chose to only allow enemies to spawn on
+whole seconds you could use Std.random in both places.</p>
+
+<p>This spawn logic is pretty simple - as a further exercise you may want
+to add some additional logic - like maybe you still want to spawn an
+enemy on a random time, but the time that you generate must always on
+a quarter second interval.</p>
+
+<p>One more note on code quality - the entire timing logic is a good
+candidate for being broken out into its own class. You generally want
+classes to do as little as possible. Again this is an issue of “works
+for us as is”, but I just thought I should bring it up.</p>
+
+<p>Now let’s tie this spawner back into KhaShmup.hx. I’ll abbreviate this
+class as its getting somewht big. Make sure to check the
+<a href="https://github.com/jamiltron/KhaShmup/tree/part-5">part-5 branch</a> if
+you have any confusion.</p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="err">...</span>
+
+<span class="err">c</span><span class="n">lass</span> <span class="n">KhaShmup</span> <span class="p">{</span>
+
+  <span class="err">...</span>
+  <span class="kd">private</span> <span class="kd">var</span> enemySpawner<span class="p">:</span> <span class="n">EnemySpawner</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">loadingFinished</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="err">...</span>
+    <span class="n">enemySpawner</span> <span class="o">=</span> <span class="k">new</span> <span class="n">EnemySpawner</span><span class="p">(</span><span class="n">Assets</span><span class="p">.</span><span class="n">images</span><span class="p">.</span><span class="n">enemyShip</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">screenWidth</span><span class="p">,</span> <span class="n">screenHeight</span><span class="p">);</span>
+    <span class="err">...</span>
+  <span class="err">}</span>
+    
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">framebuffer</span><span class="p">:</span> <span class="n">Framebuffer</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="err">...</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">bgColor</span><span class="p">);</span>
+    <span class="n">enemySpawner</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+    <span class="err">...</span>
+  <span class="err">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">timer</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+    <span class="n">enemySpawner</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">timer</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">);</span>
+    <span class="n">updateShip</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="o">...</span>
+<span class="err">}</span></code></pre></div>
+
+<h4 id="running-the-application">Running the Application</h4>
+<p>You should now see enemies spawning from the top of the screen and
+move to the bottom in random intervals. We can’t shoot them just yet,
+but we’ll be getting to that in part 6.</p>
+
+<p><img src="/images/khaShmup5.gif" alt="Lasers" /></p>
+
+<p>If you don’t see this, check out my part-5 branch:</p>
+
+<p><a href="https://github.com/jamiltron/KhaShmup/tree/part-5">https://github.com/jamiltron/KhaShmup/tree/part-5</a></p>
+
+<h4 id="in-summary">In Summary</h4>
+<p>We got enemies on screen, and the next logical step is to allow them
+to be shot. We’ll be going over some basic collision detection next time.</p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (16)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-4">Kha Shmup Tutorial Part 4</a></h2>
+          <p>Light and Sound</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
