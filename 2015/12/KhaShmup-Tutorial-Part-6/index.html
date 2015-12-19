@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-6">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 6 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 6</h1>
+  <p class="text-muted">18 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/khashmup">khashmup</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-6">Kha Shmup Tutorial Part 6</h3>
+<p>In the
+<a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-5/">last blog post</a>
+we started spawning enemies randomly on the screen, this time we’re
+going to be adding some collision detection so the player can shoot.
+We’ll start how we always do - basic, and the proceed to get more
+advanced. Since we will be developing a few different cases of
+collision, let’s add an interface for anything that has a hitbox -
+which we will use as our bounding box determining where game entities
+collide.</p>
+
+<h4 id="hitboxedhx">Hitboxed.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kd">interface</span> <span class="n">Hitboxed</span> <span class="p">{</span>
+  <span class="kd">public</span> <span class="kd">var</span> hitbox<span class="p">:</span> <span class="n">Hitbox</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">hit</span><span class="p">():</span> <span class="n">Void</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Pretty simple - we provide access to a variable hitbox, and we provide
+a method to call when the hitbox is hit. Let’s look at the
+implementation of the referenced hitbox:</p>
+
+<h4 id="hitboxhx">Hitbox.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Hitbox</span> <span class="p">{</span>
+  <span class="kd">public</span> <span class="kd">var</span> rectangle<span class="p">(</span><span class="k">default</span><span class="p">,</span> <span class="k">null</span><span class="p">):</span> <span class="n">Rectangle</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> parentX<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> parentY<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> offsetX<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> offsetY<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> width<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> height<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">parentX</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">parentY</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">offsetX</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">offsetY</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">parentX</span> <span class="o">=</span> <span class="n">parentX</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">parentY</span> <span class="o">=</span> <span class="n">parentY</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">offsetX</span> <span class="o">=</span> <span class="n">offsetX</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">offsetY</span> <span class="o">=</span> <span class="n">offsetY</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
+
+    <span class="n">rectangle</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="n">parentX</span> <span class="o">+</span> <span class="n">offsetX</span><span class="p">,</span> <span class="n">parentY</span> <span class="o">+</span> <span class="n">offsetY</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">overlaps</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">Hitbox</span><span class="p">):</span> <span class="n">Bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">rectangle</span><span class="p">.</span><span class="n">overlaps</span><span class="p">(</span><span class="n">other</span><span class="p">.</span><span class="n">rectangle</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">updatePosition</span><span class="p">(</span><span class="n">parentX</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">parentY</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">parentX</span> <span class="o">=</span> <span class="n">parentX</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">parentY</span> <span class="o">=</span> <span class="n">parentX</span><span class="p">;</span>
+    <span class="n">rectangle</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">parentX</span> <span class="o">+</span> <span class="n">offsetX</span><span class="p">;</span>
+    <span class="n">rectangle</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">parentY</span> <span class="o">+</span> <span class="n">offsetY</span><span class="p">;</span>
+    <span class="n">rectangle</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span><span class="p">;</span>
+    <span class="n">rectangle</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>I’ll explain this class more in a bit, but let’s first glance at
+Rectangle.hx</p>
+
+<h4 id="rectanglehx">Rectangle.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Rectangle</span> <span class="p">{</span>
+  <span class="kd">public</span> <span class="kd">var</span> x<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> y<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> width<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> height<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">overlaps</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">Rectangle</span><span class="p">):</span> <span class="n">Bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">other</span><span class="p">.</span><span class="n">width</span> <span class="o">&amp;&amp;</span> 
+           <span class="n">x</span> <span class="o">+</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="p">.</span><span class="n">x</span> <span class="o">&amp;&amp;</span> 
+           <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">other</span><span class="p">.</span><span class="n">height</span> <span class="o">&amp;&amp;</span> 
+           <span class="n">y</span> <span class="o">+</span> <span class="n">height</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Rectangle is pretty much what it sounds like - it has a 2d position,
+and a width and a height. It also provides a method for testing if
+another rectangle overlaps it. If one part of this rectangle is even
+touching another rectangle this method will return true.</p>
+
+<p>This method of collision detection is known as “Axis Aligned Bounding
+Box” - which is a fancy term for saying “check if two boxes, aligned
+by axis, are overlapping.” The “axis-aligned” part is important - you
+can’t test for hitboxes that have been rotated differently - there are
+algorithms for that, but this one is geared for boxes that essentially
+have the same degree of rotation as each other.</p>
+
+<p>Back to Hitbox.hx - you may wonder why I chose to use a seperate data
+structure instead of just using a rectangle directly. The reason why I
+chose this is mostly due to the different between the parent position
+and the offset. Often in games you don’t neccessarily have a
+character’s hitbox completely surround their sprite, and this is
+especially true in shmup games. You’ll sometimes have the hitbox
+represent some smaller internal structure - maybe just the cockpit of
+the ship, or sometimes you may just want to have a little leeway space
+among the sprite so they can get very close to others without
+triggering collision.</p>
+
+<p>The updatePosition method exists so that the parent object can pass
+its own updated position to the hitbox, and then the hitbox itself and
+its internal rectangle gets adjusted accourdingly. You can ofcourse
+get fancy and have custom setter properties for the hitbox’s position
+that automatically updates the rectangle, but I feel this simple
+solution works for our case.</p>
+
+<p>Hopefully this all makes sense but if it doesn’t or you have a better,
+simpler way of handling this please let me know. Let’s go ahead and
+implement this interface in Bullet.hx and Enemy.hx:</p>
+
+<h4 id="bullethx">Bullet.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+
+<span class="kd">class</span> <span class="n">Bullet</span> <span class="kd">implements</span> <span class="n">Hitboxed</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> hitbox<span class="p">:</span> <span class="n">Hitbox</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+    <span class="n">hitbox</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Hitbox</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+    <span class="n">activate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+    
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">hit</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">isActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">y</span> <span class="o">-=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+    <span class="n">hitbox</span><span class="p">.</span><span class="n">updatePosition</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="enemyhx">Enemy.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Assets</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Image</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">audio1</span><span class="p">.</span><span class="nn">Audio</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">Enemy</span> <span class="kd">implements</span> <span class="n">Hitboxed</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">var</span> hitbox<span class="p">:</span> <span class="n">Hitbox</span><span class="p">;</span>
+
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+    <span class="n">hitbox</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Hitbox</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="n">width</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="n">activate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">hit</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">Audio</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">Assets</span><span class="p">.</span><span class="n">sounds</span><span class="p">.</span><span class="n">enemyExplosion</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+    <span class="n">isActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">(</span><span class="n">deltaTime</span><span class="p">:</span> <span class="n">Float</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">y</span> <span class="o">+=</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="n">deltaTime</span><span class="p">);</span>
+    <span class="n">hitbox</span><span class="p">.</span><span class="n">updatePosition</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+    
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Now I want to develop a convenience handler for performing these
+collision checks.</p>
+
+<h4 id="collisionhandlerhx">CollisionHandler.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">CollisionHandler</span> <span class="p">{</span>
+  <span class="c1">// checks if 2 entities collide, and if so &#39;hits&#39; them both</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">handleBiCollision</span><span class="p">(</span><span class="n">h1</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">,</span> <span class="n">h2</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">testCollision</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">))</span> <span class="p">{</span>
+      <span class="n">h1</span><span class="p">.</span><span class="n">hit</span><span class="p">();</span>
+      <span class="n">h2</span><span class="p">.</span><span class="n">hit</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// compare every entity from leftGroup with every entity in rightGroup</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">handleGroupCollisions</span><span class="p">(</span><span class="n">leftGroup</span><span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;,</span> <span class="n">rightGroup</span><span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">left</span> <span class="k">in</span> <span class="n">leftGroup</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">right</span> <span class="k">in</span> <span class="n">rightGroup</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">handleBiCollision</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">testCollision</span><span class="p">(</span><span class="n">h1</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">,</span> <span class="n">h2</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">):</span> <span class="n">Bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">h1</span><span class="p">.</span><span class="n">hitbox</span><span class="p">.</span><span class="n">overlaps</span><span class="p">(</span><span class="n">h2</span><span class="p">.</span><span class="n">hitbox</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This is a pretty basic class that (currently) requires no state. It
+provides a few static convenience methods for iterating over groups of
+Hitboxed classes, tests for collision between two entities, and hits
+both if they do collide. Let’s tie this into KhaShmup.hx, abbreviate
+for space:</p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+
+<span class="kd">class</span> <span class="n">KhaShmup</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">update</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">timer</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+    <span class="n">enemySpawner</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">timer</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">);</span>
+    <span class="n">updateShip</span><span class="p">();</span>
+    <span class="n">handleCollisions</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">handleCollisions</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> bullets<span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;</span> <span class="o">=</span> <span class="k">cast</span> <span class="n">ship</span><span class="p">.</span><span class="n">gun</span><span class="p">.</span><span class="n">getActiveBullets</span><span class="p">();</span>
+    <span class="kd">var</span> enemies<span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;</span> <span class="o">=</span> <span class="k">cast</span> <span class="n">enemySpawner</span><span class="p">.</span><span class="n">getActiveEnemies</span><span class="p">();</span>
+
+    <span class="n">CollisionHandler</span><span class="p">.</span><span class="n">handleGroupCollisions</span><span class="p">(</span><span class="n">bullets</span><span class="p">,</span> <span class="n">enemies</span><span class="p">);</span>
+  <span class="p">}</span>    
+
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The case call on both of these methods are a little weird. This call
+basically tells the typechecker that we are casting from the provided
+types (which will be Array<bullet> and Array<hitbox>) to the declared
+type of Array<hitboxed>. This is because type parameters in Array are
+_invariant_. The concept of variance in computer science is somewhat
+technical but interesting if you are into type theory, so you
+can read more about it
+[here](https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science))
+and [here is a link](http://haxe.org/manual/type-system-variance.html)
+to it being addressed in the Haxe documentation.</hitboxed></hitbox></bullet></p>
+
+<p><em>Note:</em> I originally had gun be private in Ship.hx, but I decided to
+ make it public just to make calling this method on it easier. If I
+ really wanted to keep gun private, which isn’t neccessarily a bad
+ idea, I would just provide a similar getActiveBullets method in Ship
+ that called down to Gun’s method.</p>
+
+<p>Speaking of these methods, let’s define them:</p>
+
+<h4 id="gunhx">Gun.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+
+<span class="kd">class</span> <span class="n">Gun</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">getActiveBullets</span><span class="p">():</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Bullet</span><span class="p">&gt;</span> <span class="p">{</span>
+    <span class="kd">var</span> actives <span class="o">=</span> <span class="k">new</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Bullet</span><span class="p">&gt;();</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">bullets</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">actives</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">bullets</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">actives</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// ...  </span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="enemyspawnerhx">EnemySpawner.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+
+<span class="kd">class</span> <span class="n">EnemySpawner</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">getActiveEnemies</span><span class="p">():</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Enemy</span><span class="p">&gt;</span> <span class="p">{</span>
+    <span class="kd">var</span> actives <span class="o">=</span> <span class="k">new</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Enemy</span><span class="p">&gt;();</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="k">in</span> <span class="mi">0</span><span class="o">...</span><span class="n">enemies</span><span class="p">.</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">enemies</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">isActive</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">actives</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">enemies</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">actives</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// ...  </span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="running-the-application">Running the Application</h4>
+
+<p>Running now should have similar results as before - you can move,
+enemies spawn randomly, but now when you shoot an enemy it should
+disappear and play an explosion sound.</p>
+
+<p>Check my part-6 branch if this does not work for you:
+<a href="https://github.com/jamiltron/KhaShmup/tree/part-6">https://github.com/jamiltron/KhaShmup/tree/part-6</a></p>
+
+<p>In part-7 we will continue on this thread, addin in basic animations for
+the enemy ships’ destruction.</p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (17)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-5">Kha Shmup Tutorial Part 5</a></h2>
+          <p>Rascals!</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
