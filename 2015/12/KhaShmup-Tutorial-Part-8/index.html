@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-8">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 8 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 8</h1>
+  <p class="text-muted">28 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/khashmup">khashmup</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-8">Kha Shmup Tutorial Part 8</h3>
+<p><a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-7/">A week or so ago</a>
+finished up with some death animation when we shot our enemies, so in
+this tutorial we are going to be tracking how many enemies we’ve
+destroyed.</p>
+
+<p>We will start by defining a UIManager to help us keep track of the
+various UI we’ll be doing in this game, which for this tutorial will
+be just displaying a score label and amount.</p>
+
+<h4 id="uimanagerhx">UIManager.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Font</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">UIManager</span> <span class="p">{</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> font<span class="p">:</span> <span class="n">Font</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> x<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> y<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> fontSize<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+
+  <span class="kd">private</span> <span class="kd">var</span> score<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">font</span><span class="p">:</span> <span class="n">Font</span><span class="p">,</span> <span class="n">fontSize</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">font</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">fontSize</span> <span class="o">=</span> <span class="n">fontSize</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">scoreUp</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">font</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">fontSize</span> <span class="o">=</span> <span class="n">fontSize</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawString</span><span class="p">(</span><span class="s2">&quot;score: &quot;</span> <span class="o">+</span> <span class="n">score</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This class receives a font upon creation, as well as a position for
+where to display the label, and a font size for how large we want the
+display.</p>
+
+<p>This has a render method that sets the font used by our graphics2
+instance, the fontSize, and then proceeds to draw the label and the
+core at our defined position.</p>
+
+<p>There is also a function called scoreUp, which just increments the
+score. We will see how we’ll be using this as a callback to our
+collision method.</p>
+
+<p>Let’s change CollisionHandler.hx a bit:</p>
+
+<h4 id="collisionhandlerhx">CollisionHandler.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">CollisionHandler</span> <span class="p">{</span>
+
+  <span class="c1">// checks if 2 entities collide, and if so &#39;hits&#39; them both, and calls a callback</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">handleBiCollision</span><span class="p">(</span><span class="n">h1</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">,</span>     
+                                           <span class="n">h2</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">,</span>     
+                                           <span class="p">?</span><span class="n">callback</span><span class="p">:</span> <span class="n">Void</span><span class="p">-&gt;</span><span class="n">Void</span> <span class="o">=</span> <span class="kc">null</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">testCollision</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">))</span> <span class="p">{</span>
+      <span class="n">h1</span><span class="p">.</span><span class="n">hit</span><span class="p">();</span>
+      <span class="n">h2</span><span class="p">.</span><span class="n">hit</span><span class="p">();</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">callback</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">callback</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// compare every entity from leftGroup with everyone in rightGroup</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">handleGroupCollisions</span><span class="p">(</span><span class="n">leftGroup</span><span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;,</span>     
+                                               <span class="n">rightGroup</span><span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;,</span>     
+                                               <span class="p">?</span><span class="n">callback</span><span class="p">:</span> <span class="n">Void</span><span class="p">-&gt;</span><span class="n">Void</span> <span class="o">=</span> <span class="kc">null</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">left</span> <span class="k">in</span> <span class="n">leftGroup</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">right</span> <span class="k">in</span> <span class="n">rightGroup</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">handleBiCollision</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">testCollision</span><span class="p">(</span><span class="n">h1</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">,</span> <span class="n">h2</span><span class="p">:</span> <span class="n">Hitboxed</span><span class="p">):</span> <span class="n">Bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">h1</span><span class="p">.</span><span class="n">hitbox</span><span class="p">.</span><span class="n">overlaps</span><span class="p">(</span><span class="n">h2</span><span class="p">.</span><span class="n">hitbox</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The big change here is that we are providing an optional callback
+method to our “handle” methods. When we have a collision we check if
+this callback is null, and if it is not - we call it back. There is an
+obvious limitation to the fact that we can only set one callback per
+method, and if you want to supply more methods in your own game you
+obviously can pass a collection or methods.</p>
+
+<p>Let’s wire this all up in KhaShmup.hx:</p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="c1">// ...</span>
+
+<span class="kd">class</span> <span class="n">KhaSmup</span> <span class="p">{</span>
+
+  <span class="c1">// ...</span>
+  <span class="kd">private</span> <span class="kd">var</span> uiManager<span class="p">:</span> <span class="n">UIManager</span><span class="p">;</span>
+  <span class="c1">// ...</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">loadingFinished</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+    <span class="n">uiManager</span> <span class="o">=</span> <span class="k">new</span> <span class="n">UIManager</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+      <span class="n">Assets</span><span class="p">.</span><span class="n">fonts</span><span class="p">.</span><span class="n">kenpixel_mini_square</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">handleCollisions</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> bullets<span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;</span> <span class="o">=</span> <span class="k">cast</span> <span class="n">ship</span><span class="p">.</span><span class="n">gun</span><span class="p">.</span><span class="n">getActiveBullets</span><span class="p">();</span>
+    <span class="kd">var</span> enemies<span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">Hitboxed</span><span class="p">&gt;</span> <span class="o">=</span> <span class="k">cast</span> <span class="n">enemySpawner</span><span class="p">.</span><span class="n">getActiveEnemies</span><span class="p">();</span>
+
+    <span class="n">CollisionHandler</span><span class="p">.</span><span class="n">handleGroupCollisions</span><span class="p">(</span><span class="n">bullets</span><span class="p">,</span> <span class="n">enemies</span><span class="p">,</span> <span class="n">uiManager</span><span class="p">.</span><span class="n">scoreUp</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This should be clear - we just instantiate our ui manager and we pass
+the uiManager’s scoreUp method as the callback for the collisions
+between bullets and enemies.</p>
+
+<p>I am using the KenPixel Mini Square font from Kenny.nl’s
+<a href="http://kenney.nl/assets/kenney-fonts">Font Pack</a>. You can use your
+own font if you wish, just make sure you change the referenced assets
+when instantiating the uiManager.</p>
+
+<h4 id="running-the-application">Running the Application</h4>
+
+<p>Now run the game and you should see score ticking up when you shoot
+enemies:</p>
+
+<p><img src="/images/khaShmup8.gif" alt="KhaShmup8" /></p>
+
+<p>Check my part 8 branch if you don’t see this:
+<a href="https://github.com/jamiltron/KhaShmup/tree/part-8">https://github.com/jamiltron/KhaShmup/tree/part-8</a></p>
+
+<p>We’re getting close to finishing our game. Next time let’s add a death
+state for the player, along with some state management.</p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (19)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-7">Kha Shmup Tutorial Part 7</a></h2>
+          <p>Explosions!</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
