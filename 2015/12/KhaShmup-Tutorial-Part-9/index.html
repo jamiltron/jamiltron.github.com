@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/shiori.css">
+    <link href='//fonts.googleapis.com/css?family=Montserrat:700,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="canonical" href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-9">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>Kha Shmup Tutorial Part 9 | Jamiltron</title>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+  </head>
+  <body>
+  
+    <div class="navbar navbar-inverse navbar-static-top">
+  
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-toggle-wrapper visible-xs">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".js-navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <a href="/" class="navbar-brand">Jamiltron</a>
+        </div>
+        <div class="collapse navbar-collapse js-navbar-collapse">
+          <ul class="navbar-nav nav" data-purplecoat="shiori" data-purplecoat-label="nav.html">
+            <li><a href="/archive">Archive</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/feed.xml">RSS</a></li>
+
+          </ul>
+          <ul class="navbar-nav nav navbar-right" data-purplecoat="shiori" data-purplecoat-label="nav-right.html">
+            
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        
+          <div class="col-sm-8">
+            <div class="post-header">
+  <h1 class="post-title-main">Kha Shmup Tutorial Part 9</h1>
+  <p class="text-muted">30 Dec 2015 |
+  
+  <a href="/categories/game-dev">game-dev</a>, 
+  
+  <a href="/categories/kha">kha</a>, 
+  
+  <a href="/categories/khashmup">khashmup</a>, 
+  
+  <a href="/categories/haxe">haxe</a>, 
+  
+  <a href="/categories/tutorial">tutorial</a>
+  
+</p>
+
+</div>
+<div class="post-content">
+  <h3 id="kha-shmup-tutorial-part-8">Kha Shmup Tutorial Part 8</h3>
+<p><a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-8/">We finished adding score to our main game</a>,
+so now let’s start wrapping up by adding a main menu.</p>
+
+<p>We are going to be changing our UIManager a little bit to accomodate
+these changes. This UIManager is pretty naive - we are assuming quite
+a bit in this tutorial making a few things easier for us:</p>
+
+<ol>
+  <li>The screen will remain at 800x600 and we do not have to worry about
+additional resolutions or resizing.</li>
+  <li>We only have a few elements we need to render, and thus hardcoding
+values in a couple places will be easier than spending the time to
+create a more versatile and generic solution.</li>
+</ol>
+
+<p>Developing a robust UI can be a pretty lengthy topic on its own, you
+may want to use something like
+<a href="https://github.com/luboslenco/zui">zui</a> or
+<a href="http://haxeui.org">haxeui</a> (which currently doesn’t support Kha, but
+is supposed to be coming in version 2).</p>
+
+<p>Developing a more customized solution may be a fun project for your
+own game, but for now we’re just going to hammer out a solution that
+works for us for the time being:</p>
+
+<h4 id="uimanagerhx">UIManager.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">Font</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="n">UIManager</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> scoreX <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> scoreY <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> titleY <span class="o">=</span> <span class="mi">60</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> titleStr <span class="o">=</span> <span class="s2">&quot;Kha Shmup&quot;</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> keysStr <span class="o">=</span> <span class="s2">&quot;Arrow Keys to move, Z key to shoot.&quot;</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> keysY <span class="o">=</span> <span class="mi">130</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> startStr <span class="o">=</span> <span class="s2">&quot;Press Z to start.&quot;</span><span class="p">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">inline</span> <span class="kd">var</span> startY <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">var</span> font<span class="p">:</span> <span class="n">Font</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> scoreSize<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> titleSize<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> instructionSize<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+  <span class="kd">public</span> <span class="kd">var</span> viewport<span class="p">:</span> <span class="n">Rectangle</span><span class="p">;</span>
+
+  <span class="kd">private</span> <span class="kd">var</span> score<span class="p">:</span> <span class="n">Int</span><span class="p">;</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">new</span><span class="p">(</span><span class="n">font</span><span class="p">:</span> <span class="n">Font</span><span class="p">,</span> <span class="n">scoreSize</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">titleSize</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> 
+                      <span class="n">instructionSize</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">viewport</span><span class="p">:</span> <span class="n">Rectangle</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">font</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">scoreSize</span> <span class="o">=</span> <span class="n">scoreSize</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">titleSize</span> <span class="o">=</span> <span class="n">titleSize</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">instructionSize</span> <span class="o">=</span> <span class="n">instructionSize</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">viewport</span> <span class="o">=</span> <span class="n">viewport</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">scoreUp</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">renderScore</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">font</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">fontSize</span> <span class="o">=</span> <span class="n">scoreSize</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawString</span><span class="p">(</span><span class="s2">&quot;score: &quot;</span> <span class="o">+</span> <span class="n">score</span><span class="p">,</span> <span class="n">viewport</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">scoreX</span><span class="p">,</span> <span class="n">viewport</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">scoreY</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">renderMainMenu</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">font</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">fontSize</span> <span class="o">=</span> <span class="n">titleSize</span><span class="p">;</span>
+    <span class="kd">var</span> x <span class="o">=</span> <span class="n">viewport</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">viewport</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+
+    <span class="kd">var</span> titleW <span class="o">=</span> <span class="n">g</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="n">titleSize</span><span class="p">,</span> <span class="n">titleStr</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawString</span><span class="p">(</span><span class="n">titleStr</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">titleW</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">viewport</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">titleY</span><span class="p">);</span>
+
+    <span class="n">g</span><span class="p">.</span><span class="n">fontSize</span> <span class="o">=</span> <span class="n">instructionSize</span><span class="p">;</span>
+    <span class="kd">var</span> keysW <span class="o">=</span> <span class="n">g</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="n">instructionSize</span><span class="p">,</span> <span class="n">keysStr</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawString</span><span class="p">(</span><span class="n">keysStr</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">keysW</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">viewport</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">keysY</span><span class="p">);</span>
+
+    <span class="kd">var</span> startW <span class="o">=</span> <span class="n">g</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="n">instructionSize</span><span class="p">,</span> <span class="n">startStr</span><span class="p">);</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">drawString</span><span class="p">(</span><span class="n">startStr</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">startW</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">viewport</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">startY</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The biggest changes is instead of a render method, we have shifted to
+rendering the main menu, or rendering the score. Notice the
+g.font.width method - this method will give you the width of a string
+when rendered using the set font, as well as a provided font size.
+There is also a corresponding height method.</p>
+
+<p>We pretty much hardcore where the text is going to appear, with a
+little bit of flexibility to adjust it given a viewport. We are
+manually justifying these labels, but you can see how you may allow
+the user to define ui elements and provide a justification.</p>
+
+<p>The two methods are pretty straight forward - renderScore is the same
+as this object’s previous render method, and renderMainMenu draws
+three lines - the title, instructions, and what button to press to
+begin playing.</p>
+
+<p>We are now going to adjust our main game class to account for
+different states, and to render and update differently:</p>
+
+<h4 id="khashmuphx">KhaShmup.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="kn">package</span><span class="p">;</span>
+
+<span class="c1">// ...</span>
+<span class="kn">import</span> <span class="nn">kha</span><span class="p">.</span><span class="nn">graphics2</span><span class="p">.</span><span class="nn">Graphics</span><span class="p">;</span>
+<span class="c1">// ...</span>
+
+<span class="kd">enum</span> <span class="n">GameState</span> <span class="p">{</span>
+  <span class="n">Initializing</span><span class="p">;</span>
+  <span class="n">MainMenu</span><span class="p">;</span>
+  <span class="n">Playing</span><span class="p">;</span>
+  <span class="n">Over</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="n">KhaShmup</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">private</span> <span class="kd">var</span> gameState<span class="p">:</span> <span class="n">GameState</span><span class="p">;</span>
+  <span class="c1">// make sure to delete the &#39;initialized&#39; var, as</span>
+  <span class="c1">// gamestate will take care of what it was doing</span>
+
+  <span class="c1">// ...</span>
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">loadingFinished</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">gameState</span> <span class="o">=</span> <span class="n">GameState</span><span class="p">.</span><span class="n">MainMenu</span><span class="p">;</span>
+    <span class="n">uiManager</span> <span class="o">=</span> <span class="k">new</span> <span class="n">UIManager</span><span class="p">(</span><span class="n">Assets</span><span class="p">.</span><span class="n">fonts</span><span class="p">.</span><span class="n">kenpixel_mini_square</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span>    
+      <span class="mi">80</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span><span class="k">new</span> <span class="n">Rectangle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">screenWidth</span><span class="p">,</span> <span class="n">screenHeight</span><span class="p">));</span>
+    <span class="c1">// ...</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">reset</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">controls</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
+      <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">));</span>
+    <span class="n">enemySpawner</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+  <span class="p">}</span>  
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">renderMainMenu</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">uiManager</span><span class="p">.</span><span class="n">renderMainMenu</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">renderPlaying</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">enemySpawner</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">ship</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">uiManager</span><span class="p">.</span><span class="n">renderScore</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">framebuffer</span><span class="p">:</span> <span class="n">Framebuffer</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">Type</span><span class="p">.</span><span class="n">enumEq</span><span class="p">(</span><span class="n">gameState</span><span class="p">,</span> <span class="n">GameState</span><span class="p">.</span><span class="n">Initializing</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> g <span class="o">=</span> <span class="n">backbuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">;</span>
+
+    <span class="c1">// clear and draw to our backbuffer</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">bgColor</span><span class="p">);</span>
+    <span class="k">switch</span><span class="p">(</span><span class="n">gameState</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">GameState</span><span class="p">.</span><span class="n">MainMenu</span><span class="p">:</span>
+      <span class="n">renderMainMenu</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+      <span class="n">updateMainMenu</span><span class="p">();</span>
+    <span class="k">case</span> <span class="n">GameState</span><span class="p">.</span><span class="n">Playing</span><span class="p">:</span>
+      <span class="n">renderPlaying</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+      <span class="n">updatePlaying</span><span class="p">();</span>
+    <span class="k">default</span><span class="p">:</span>
+      <span class="c1">// no-op</span>
+    <span class="p">}</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+
+    <span class="c1">// draw our backbuffer onto the active framebuffer</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+    <span class="n">Scaler</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="n">backbuffer</span><span class="p">,</span> <span class="n">framebuffer</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="n">screenRotation</span><span class="p">);</span>
+    <span class="n">framebuffer</span><span class="p">.</span><span class="n">g2</span><span class="p">.</span><span class="n">end</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">updateMainMenu</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">controls</span><span class="p">.</span><span class="n">shoot</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">reset</span><span class="p">();</span>
+      <span class="n">gameState</span> <span class="o">=</span> <span class="n">GameState</span><span class="p">.</span><span class="n">Playing</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="kd">function</span> <span class="nf">updatePlaying</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">timer</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+    <span class="n">enemySpawner</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">timer</span><span class="p">.</span><span class="n">deltaTime</span><span class="p">);</span>
+    <span class="n">updateShip</span><span class="p">();</span>
+    <span class="n">handleCollisions</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The first major difference is the addition of a GameState enum. This
+will track what part of the game we are in, and what update and render
+methods to be called. We’ve also removed the initialized boolean
+variable as gameState will now take care of flagging when we are
+initialized.</p>
+
+<p>We have adjusted our render method to check what state we are in and
+then call the added methods for rendering the main menu state, or the
+playing state (and we will add the game over state next time). We have
+also added a reset method - this is handy to set everything back to
+pretty close to how everything was upon initialization. We’re mostly
+using it to toggle the start button so the player doesn’t immediately
+shoot after moving through the menu, but this method will also be
+useful when we want to start the game over.</p>
+
+<p>We now need to add a few reset methods to various classes.</p>
+
+<h4 id="controlshx">Controls.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">//...</span>
+
+<span class="kd">class</span> <span class="n">Controls</span> <span class="p">{</span>
+ <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">reset</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="n">up</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="n">down</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="n">shoot</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// ...  </span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="shiphx">Ship.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+<span class="kd">class</span> <span class="n">Ship</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">reset</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">gun</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">gun</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="gunhx">Gun.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+<span class="kd">class</span> <span class="n">Gun</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">reset</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">cooldownLeft</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">bullet</span> <span class="k">in</span> <span class="n">bullets</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">bullet</span><span class="p">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="enemyspawnerhx">EnemySpawner.hx</h4>
+
+<div class="highlight"><pre><code class="language-haxe" data-lang="haxe"><span class="c1">// ...</span>
+<span class="kd">class</span> <span class="n">EnemySpawner</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">reset</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">currentTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">spawnNextTime</span> <span class="o">=</span> <span class="n">generateRandomSpawnTime</span><span class="p">(</span><span class="n">spawnMinTime</span><span class="p">,</span> <span class="n">spawnMaxTime</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">enemy</span> <span class="k">in</span> <span class="n">enemies</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">enemy</span><span class="p">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="running-the-application">Running the Application</h4>
+
+<p>After our current changest you should see a main menu and you should
+be able to press Z to move to playing the game.</p>
+
+<p><img src="/images/khaShmup9.png" alt="KhaShmup9" /></p>
+
+<p>As always, check out my part 9 branch if you’re having issues:
+<a href="https://github.com/jamiltron/KhaShmup/tree/part-9">https://github.com/jamiltron/KhaShmup/tree/part-9</a></p>
+
+<p>We have one more state to add to the game before putting on the
+finishing touches, which is the promised game-over state.</p>
+
+</div>
+<div class="post-footer">
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://jamiltron.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=jamiltron">comments powered by Disqus.</a></noscript>
+
+</div>
+
+  
+    <div class="post-navs row">
+      
+        <div class="col-md-6 post-nav">
+          <h3 class="section-header">
+            Older
+            <span class="text-muted"> &middot; </span>
+            <a href="/archive">View Archive (20)</a>
+          </h3>
+          <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-8">Kha Shmup Tutorial Part 8</a></h2>
+          <p>Keeping Score</p>
+
+        </div>
+      
+      
+    </div>
+  
+
+
+          </div>
+          <div class="col-sm-4">
+            <h3>
+  Author
+</h3>
+
+  <p>
+    <div class="media">
+      <img src="https://avatars0.githubusercontent.com/u/374204?v=3&amp;s=100" alt="Justin Hamilton" class="pull-left">
+      <div class="media-body">
+        <h4 class="media-heading">Justin Hamilton</h4>
+      </div>
+    </div>
+  </p>
+
+  <p><a class="github-button" href="https://github.com/jamiltron" data-style="mega">Follow @jamiltron</a></p>
+<p><a href="https://twitter.com/jamiltron" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false" data-dnt="true" data-size="large">Follow @jamiltron</a></p>
+
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+
+          </div>
+        
+      </div>
+      <div class="row footer">
+        <div class="col-sm-12 text-center">
+          <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
+<div data-purplecoat="shiori" data-purplecoat-label="footer.html">
+&copy;2015.
+Built with <a href="http://jekyllrb.com/">Jekyll</a> and
+<a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
+</div>
+        </div>
+      </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src="/javascripts/purplecoat-min.js"></script>
+    <!-- Place your <script> tags here. -->
+
+<!-- Example: Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+  </body>
+</html>
