@@ -153,6 +153,10 @@ works for us for the time being:</p>
     <span class="kd">var</span> startW <span class="o">=</span> <span class="n">g</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="n">instructionSize</span><span class="p">,</span> <span class="n">startStr</span><span class="p">);</span>
     <span class="n">g</span><span class="p">.</span><span class="n">drawString</span><span class="p">(</span><span class="n">startStr</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Math</span><span class="p">.</span><span class="n">round</span><span class="p">(</span><span class="n">startW</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">viewport</span><span class="p">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">startY</span><span class="p">);</span>
   <span class="p">}</span>
+
+  <span class="kd">public</span> <span class="kd">function</span> <span class="nf">reset</span><span class="p">():</span> <span class="n">Void</span> <span class="p">{</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 
 <p>The biggest changes is instead of a render method, we have shifted to
@@ -208,6 +212,8 @@ different states, and to render and update differently:</p>
     <span class="n">ship</span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> 
       <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">screenHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">ship</span><span class="p">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">));</span>
     <span class="n">enemySpawner</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+    <span class="n">uiManager</span><span class="p">.</span><span class="n">rest</span><span class="p">();</span>
+    <span class="n">timer</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>    
   <span class="p">}</span>  
 
   <span class="kd">private</span> <span class="kd">function</span> <span class="nf">renderMainMenu</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Graphics</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
