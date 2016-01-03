@@ -150,7 +150,7 @@ is what we will be using to manage these bullets:</p>
 
   <span class="kd">public</span> <span class="kd">function</span> <span class="nf">shoot</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">cooldownLeft</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-      <span class="n">Audio</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">bulletSound</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+      <span class="n">Audio</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">bulletSound</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
       <span class="n">cooldownLeft</span> <span class="o">=</span> <span class="n">shotInterval</span><span class="p">;</span>
       <span class="kd">var</span> adjX<span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">bulletImage</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
 
@@ -192,8 +192,11 @@ is what we will be using to manage these bullets:</p>
 feature - we have a shotInterval variable that defines how long in
 seconds we wait between two shots. When the user shoots, we check if
 the cooldownLeft is at zero, and if it is - we set it to the interval
-, create a bullet, and play a sound. This sound is played by calling
-Audio.play, which is how we can interface with Kha’s audio1 api.</p>
+, create a bullet, and play a sound. The Audio.play method takes a
+sound, a boolean to specify if you want it to loop or not, and another
+boolean to specify if you want to stream the sound or not. This sound
+is played by calling Audio.play, which is how we can interface with
+Kha’s audio1 api.</p>
 
 <p>The bullet creation may look a little interesting - we have an array,
 and when we create a bullet we iterate through this array looking for
@@ -563,7 +566,7 @@ we’ll be adding some targets for the player to shoot.</p>
         <div class="col-sm-12 text-center">
           <!-- Feel free to remove this div. Uses purplecoat: http://ellekasai.github.io/purplecoat.js -->
 <div data-purplecoat="shiori" data-purplecoat-label="footer.html">
-&copy;2015.
+&copy;2016.
 Built with <a href="http://jekyllrb.com/">Jekyll</a> and
 <a href="https://github.com/ellekasai/shiori">Shiori Theme</a>.
 </div>
