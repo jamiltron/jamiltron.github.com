@@ -5,9 +5,95 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 03 Jan 2016 20:44:16 -0800</pubDate>
-    <lastBuildDate>Sun, 03 Jan 2016 20:44:16 -0800</lastBuildDate>
+    <pubDate>Mon, 04 Jan 2016 20:31:15 -0800</pubDate>
+    <lastBuildDate>Mon, 04 Jan 2016 20:31:15 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Kha Shmup Tutorial Wrap Up</title>
+        <description>&lt;h3 id=&quot;kha-shmup-tutorial-wrap-up&quot;&gt;Kha Shmup Tutorial Wrap Up&lt;/h3&gt;
+
+&lt;p&gt;We set out to learn how to make a basic game in
+&lt;a href=&quot;http://kha.ktxsoftware.com&quot;&gt;Kha&lt;/a&gt; and step-by-step we put together a
+game using basic features of Kha. We learned the basics of rendering
+sprites, recieving input, playing sound, and we wrote a basic
+animation system as well as object pools for the types of objects we
+were going to be creating and destroying over and over.&lt;/p&gt;
+
+&lt;h4 id=&quot;extending-the-game&quot;&gt;Extending the Game&lt;/h4&gt;
+&lt;p&gt;This game can be extended in a number of ways, here are some
+of the things that immediately come to mind:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Provide levels for the player to get through - either by
+score-chasing or just playing through a specific sequence of
+enemies.&lt;/li&gt;
+  &lt;li&gt;Allow enemies to shoot back at the player.&lt;/li&gt;
+  &lt;li&gt;Develop different kinds of enemies than the basic one we have.  &lt;/li&gt;
+  &lt;li&gt;Design an AudioManager to handle sound, so if the user wants to
+adjust the volume or turn sound off, its easily adjustable in one
+place.&lt;/li&gt;
+  &lt;li&gt;Use or develop a more fully-featured ui system, so that if the
+screen size is adjusted, the ui is appropriately scaled and
+adjusted.&lt;/li&gt;
+  &lt;li&gt;Develop an EventSystem so that classes can register to recieve
+certain types of events, or to send events.&lt;/li&gt;
+  &lt;li&gt;Generally clean up the code base, maybe develop the game using a
+different architecture, such as an
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Entity_component_system&quot;&gt;entity-component-system&lt;/a&gt;
+or
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller&quot;&gt;model-view-controller&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;resources&quot;&gt;Resources&lt;/h4&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/KTXSoftware/Kha&quot;&gt;Kha on Github&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://forum.ktxsoftware.com/category/2/kha&quot;&gt;Kha Forums&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/KTXSoftware/Kha/wiki&quot;&gt;Kha Wiki&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://luboslenco.com/kha3d/&quot;&gt;Kha 3D&lt;/a&gt; tutorials by Lubos Lenco.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/luboslenco&quot;&gt;Lubos Lenco’s github&lt;/a&gt; contains a lot
+of great stuff, including the &lt;a href=&quot;https://github.com/luboslenco/zui&quot;&gt;zui&lt;/a&gt;
+gui system for kha.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/triplefox/khaguide&quot;&gt;Another great Kha tutorial&lt;/a&gt; by James Hoffman.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://hxscout.com/&quot;&gt;hxScout&lt;/a&gt; for profiling your games.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://kenney.nl/assets&quot;&gt;Kenny’s assets&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.bfxr.net/&quot;&gt;bfxr.net&lt;/a&gt; for quick audio generation.&lt;/p&gt;
+
+&lt;p&gt;Probably a ton more I am forgetting - please include more in the
+comments!&lt;/p&gt;
+
+&lt;h4 id=&quot;finished-product&quot;&gt;Finished Product&lt;/h4&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+&lt;canvas id=&quot;khanvas&quot; width=&quot;800&quot; height=&quot;600&quot; style=&quot;outline: none;&quot;&gt;&lt;/canvas&gt;
+&lt;/p&gt;
+&lt;script src=&quot;/khaShmup/kha.js&quot;&gt;&lt;/script&gt;
+
+</description>
+        <pubDate>Mon, 04 Jan 2016 00:00:00 -0800</pubDate>
+        <link>http://jamiltron.com/2016/01/KhaShmup-Tutorial-Wrap-Up</link>
+        <guid isPermaLink="true">http://jamiltron.com/2016/01/KhaShmup-Tutorial-Wrap-Up</guid>
+        
+        
+        <category>game-dev</category>
+        
+        <category>kha</category>
+        
+        <category>khashmup</category>
+        
+        <category>haxe</category>
+        
+        <category>tutorial</category>
+        
+      </item>
     
       <item>
         <title>Kha Shmup Tutorial Part 10</title>
