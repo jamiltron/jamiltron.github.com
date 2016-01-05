@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 04 Jan 2016 21:36:57 -0800</pubDate>
-    <lastBuildDate>Mon, 04 Jan 2016 21:36:57 -0800</lastBuildDate>
+    <pubDate>Mon, 04 Jan 2016 22:14:53 -0800</pubDate>
+    <lastBuildDate>Mon, 04 Jan 2016 22:14:53 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -37,7 +37,7 @@ score-chasing or just playing through a specific sequence of
 enemies.&lt;/li&gt;
   &lt;li&gt;Allow enemies to shoot back at the player.&lt;/li&gt;
   &lt;li&gt;Add a cool scrolling background.  &lt;/li&gt;
-  &lt;li&gt;Develop different kinds of enemies than the basic one we have.&lt;/li&gt;
+  &lt;li&gt;Develop different kinds of enemies other than the basic one we have.&lt;/li&gt;
   &lt;li&gt;Improve performance - there are a few points such as
 Gun.getActiveBullets() and EnemySpawner.getActiveEnemies() where we are
 generating a new array every frame - we could probably extend Hitbox
