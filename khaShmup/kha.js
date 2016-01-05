@@ -52,15 +52,18 @@ var Hitboxed = function() { };
 $hxClasses["Hitboxed"] = Hitboxed;
 Hitboxed.__name__ = true;
 Hitboxed.prototype = {
-	hitbox: null
+	get_isActive: null
+	,set_isActive: null
+	,hitbox: null
 	,hit: null
 	,__class__: Hitboxed
 };
 var Bullet = function(x,y,image) {
-	this.isActive = true;
+	this.active = true;
 	this.speed = 600;
 	this.image = image;
 	this.hitbox = new Hitbox(x,y,0,0,image.get_width(),image.get_height());
+	this.set_isActive(true);
 	this.activate(x,y);
 };
 $hxClasses["Bullet"] = Bullet;
@@ -72,21 +75,27 @@ Bullet.prototype = {
 	,x: null
 	,y: null
 	,speed: null
-	,isActive: null
+	,active: null
+	,get_isActive: function() {
+		return this.active;
+	}
+	,set_isActive: function(isActive) {
+		return this.active = isActive;
+	}
 	,activate: function(x,y) {
 		this.x = x;
 		this.y = y;
 		this.hitbox.updatePosition(x,y);
-		this.isActive = true;
+		this.set_isActive(true);
 	}
 	,hit: function() {
-		this.isActive = false;
+		this.set_isActive(false);
 	}
 	,render: function(g) {
-		if(this.isActive && this.image != null) g.drawImage(this.image,this.x,this.y);
+		if(this.get_isActive() && this.image != null) g.drawImage(this.image,this.x,this.y);
 	}
 	,update: function(deltaTime) {
-		if(!this.isActive) return;
+		if(!this.get_isActive()) return;
 		this.y -= Math.round(this.speed * deltaTime);
 		this.hitbox.updatePosition(this.x,this.y);
 	}
@@ -96,6 +105,7 @@ var CollisionHandler = function() { };
 $hxClasses["CollisionHandler"] = CollisionHandler;
 CollisionHandler.__name__ = true;
 CollisionHandler.handleBiCollision = function(h1,h2,callback) {
+	if(!h1.get_isActive() || !h2.get_isActive()) return;
 	if(CollisionHandler.testCollision(h1,h2)) {
 		h1.hit();
 		h2.hit();
@@ -107,15 +117,18 @@ CollisionHandler.handleGroupCollisions = function(leftGroup,rightGroup,callback)
 	while(_g < leftGroup.length) {
 		var left = leftGroup[_g];
 		++_g;
+		if(!left.get_isActive()) continue;
 		var _g1 = 0;
 		while(_g1 < rightGroup.length) {
 			var right = rightGroup[_g1];
 			++_g1;
+			if(!right.get_isActive()) continue;
 			CollisionHandler.handleBiCollision(left,right,callback);
 		}
 	}
 };
 CollisionHandler.handleSingleToGroupCollisions = function(single,group,callback) {
+	if(!single.get_isActive()) return;
 	var _g = 0;
 	while(_g < group.length) {
 		var g = group[_g];
@@ -124,7 +137,7 @@ CollisionHandler.handleSingleToGroupCollisions = function(single,group,callback)
 	}
 };
 CollisionHandler.testCollision = function(h1,h2) {
-	return h1.hitbox.overlaps(h2.hitbox);
+	return h1.get_isActive() && h2.get_isActive() && h1.hitbox.overlaps(h2.hitbox);
 };
 var Controls = function() {
 };
@@ -353,14 +366,7 @@ EnemySpawner.prototype = {
 		this.enemies.push(new Enemy(x,y,this.activeAnimation,this.explodeAnimation,this.explodeSound));
 	}
 	,getActiveEnemies: function() {
-		var actives = [];
-		var _g1 = 0;
-		var _g = this.enemies.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(this.enemies[i].get_isActive()) actives.push(this.enemies[i]);
-		}
-		return actives;
+		return this.enemies;
 	}
 	,update: function(deltaTime) {
 		this.currentTime += deltaTime;
@@ -404,14 +410,7 @@ Gun.prototype = {
 	,cooldownLeft: null
 	,bullets: null
 	,getActiveBullets: function() {
-		var actives = [];
-		var _g1 = 0;
-		var _g = this.bullets.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			if(this.bullets[i].isActive) actives.push(this.bullets[i]);
-		}
-		return actives;
+		return this.bullets;
 	}
 	,reset: function() {
 		this.cooldownLeft = 0;
@@ -420,7 +419,7 @@ Gun.prototype = {
 		while(_g < _g1.length) {
 			var bullet = _g1[_g];
 			++_g;
-			bullet.isActive = false;
+			bullet.set_isActive(false);
 		}
 	}
 	,shoot: function(x,y) {
@@ -432,7 +431,7 @@ Gun.prototype = {
 			var _g = this.bullets.length;
 			while(_g1 < _g) {
 				var i = _g1++;
-				if(!this.bullets[i].isActive) {
+				if(!this.bullets[i].get_isActive()) {
 					this.bullets[i].activate(adjX,y);
 					return;
 				}
@@ -449,7 +448,7 @@ Gun.prototype = {
 			var i = _g1++;
 			var bullet = this.bullets[i];
 			bullet.update(deltaTime);
-			if(bullet.isActive && bullet.y + this.bulletImage.get_height() < 0) this.bullets[i].isActive = false;
+			if(bullet.get_isActive() && bullet.y + this.bulletImage.get_height() < 0) this.bullets[i].set_isActive(false);
 		}
 	}
 	,render: function(g) {
@@ -902,7 +901,7 @@ Reflect.isFunction = function(f) {
 };
 var Ship = function(x,y,image,explosionSound) {
 	this.speed = 300.0;
-	this.isActive = true;
+	this.active = true;
 	this.gunOffsetY = 10;
 	this.hitbox = new Hitbox(x,y,0,0,image.get_width(),image.get_height());
 	this.set_x(x);
@@ -916,7 +915,7 @@ Ship.__interfaces__ = [Hitboxed];
 Ship.prototype = {
 	image: null
 	,gunOffsetY: null
-	,isActive: null
+	,active: null
 	,explosionSound: null
 	,hitbox: null
 	,gun: null
@@ -925,6 +924,12 @@ Ship.prototype = {
 	,width: null
 	,height: null
 	,speed: null
+	,get_isActive: function() {
+		return this.active;
+	}
+	,set_isActive: function(isActive) {
+		return this.active = isActive;
+	}
 	,get_width: function() {
 		return this.image.get_width();
 	}
@@ -940,22 +945,22 @@ Ship.prototype = {
 		return this.y = y;
 	}
 	,hit: function() {
-		this.isActive = false;
+		this.set_isActive(false);
 		kha_audio2_Audio1.play(this.explosionSound,false,true);
 	}
 	,render: function(g) {
-		if(!this.isActive) return;
+		if(!this.get_isActive()) return;
 		if(this.gun != null) this.gun.render(g);
 		g.drawImage(this.image,this.x,this.y);
 	}
 	,reset: function(x,y) {
-		this.isActive = true;
+		this.set_isActive(true);
 		this.set_x(x);
 		this.set_y(y);
 		if(this.gun != null) this.gun.reset();
 	}
 	,update: function(controls,deltaTime) {
-		if(!this.isActive) return;
+		if(!this.get_isActive()) return;
 		if(controls.left && !controls.right) {
 			var _g = this;
 			_g.set_x(_g.x - Math.round(this.speed * deltaTime));

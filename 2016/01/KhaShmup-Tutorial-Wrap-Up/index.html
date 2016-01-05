@@ -70,6 +70,11 @@
 <div class="post-content">
   <h3 id="kha-shmup-tutorial-wrap-up">Kha Shmup Tutorial Wrap Up</h3>
 
+<h4 id="finished-product">Finished Product</h4>
+<p align="center">
+<canvas id="khanvas" width="800" height="600" style="outline: none;"></canvas>
+</p>
+
 <p>We set out to learn how to make a basic game in
 <a href="http://kha.ktxsoftware.com">Kha</a> and step-by-step we put together a
 game using basic features of Kha. We learned the basics of rendering
@@ -86,9 +91,10 @@ of the things that immediately come to mind:</p>
 score-chasing or just playing through a specific sequence of
 enemies.</li>
   <li>Allow enemies to shoot back at the player.</li>
+  <li>Add a cool scrolling background.  </li>
   <li>Develop different kinds of enemies than the basic one we have.</li>
   <li>Improve performance - there are a few points such as
-Gun.getActives() and EnemySpawner.getActives() where we are
+Gun.getActiveBullets() and EnemySpawner.getActiveEnemies() where we are
 generating a new array every frame - we could probably extend Hitbox
 to contain whether or not a given hitbox should generate collisions
 or not and remove this hit altogether. There are also a few points
