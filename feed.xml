@@ -5,13 +5,17 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 04 Jan 2016 20:31:15 -0800</pubDate>
-    <lastBuildDate>Mon, 04 Jan 2016 20:31:15 -0800</lastBuildDate>
+    <pubDate>Mon, 04 Jan 2016 20:33:37 -0800</pubDate>
+    <lastBuildDate>Mon, 04 Jan 2016 20:33:37 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>Kha Shmup Tutorial Wrap Up</title>
         <description>&lt;h3 id=&quot;kha-shmup-tutorial-wrap-up&quot;&gt;Kha Shmup Tutorial Wrap Up&lt;/h3&gt;
+&lt;p align=&quot;center&quot;&gt;
+&lt;canvas id=&quot;khanvas&quot; width=&quot;800&quot; height=&quot;600&quot; style=&quot;outline: none;&quot;&gt;&lt;/canvas&gt;
+&lt;/p&gt;
+&lt;script src=&quot;/khaShmup/kha.js&quot;&gt;&lt;/script&gt;
 
 &lt;p&gt;We set out to learn how to make a basic game in
 &lt;a href=&quot;http://kha.ktxsoftware.com&quot;&gt;Kha&lt;/a&gt; and step-by-step we put together a
@@ -69,13 +73,6 @@ gui system for kha.&lt;/p&gt;
 
 &lt;p&gt;Probably a ton more I am forgetting - please include more in the
 comments!&lt;/p&gt;
-
-&lt;h4 id=&quot;finished-product&quot;&gt;Finished Product&lt;/h4&gt;
-
-&lt;p align=&quot;center&quot;&gt;
-&lt;canvas id=&quot;khanvas&quot; width=&quot;800&quot; height=&quot;600&quot; style=&quot;outline: none;&quot;&gt;&lt;/canvas&gt;
-&lt;/p&gt;
-&lt;script src=&quot;/khaShmup/kha.js&quot;&gt;&lt;/script&gt;
 
 </description>
         <pubDate>Mon, 04 Jan 2016 00:00:00 -0800</pubDate>
