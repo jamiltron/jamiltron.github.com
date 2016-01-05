@@ -5,8 +5,8 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 04 Jan 2016 21:34:53 -0800</pubDate>
-    <lastBuildDate>Mon, 04 Jan 2016 21:34:53 -0800</lastBuildDate>
+    <pubDate>Mon, 04 Jan 2016 21:36:57 -0800</pubDate>
+    <lastBuildDate>Mon, 04 Jan 2016 21:36:57 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -17,7 +17,7 @@
 &lt;p align=&quot;center&quot;&gt;
 &lt;canvas id=&quot;khanvas&quot; width=&quot;800&quot; height=&quot;600&quot; style=&quot;outline: none;&quot;&gt;&lt;/canvas&gt;
 &lt;/p&gt;
-&lt;script src=&quot;kha.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/khaShmup/kha.js&quot;&gt;&lt;/script&gt;
 
 &lt;h4 id=&quot;wrap-up&quot;&gt;Wrap Up&lt;/h4&gt;
 &lt;p&gt;We set out to learn how to make a basic game in
