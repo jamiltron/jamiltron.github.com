@@ -5,17 +5,13 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 04 Jan 2016 20:33:37 -0800</pubDate>
-    <lastBuildDate>Mon, 04 Jan 2016 20:33:37 -0800</lastBuildDate>
+    <pubDate>Mon, 04 Jan 2016 21:16:51 -0800</pubDate>
+    <lastBuildDate>Mon, 04 Jan 2016 21:16:51 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>Kha Shmup Tutorial Wrap Up</title>
         <description>&lt;h3 id=&quot;kha-shmup-tutorial-wrap-up&quot;&gt;Kha Shmup Tutorial Wrap Up&lt;/h3&gt;
-&lt;p align=&quot;center&quot;&gt;
-&lt;canvas id=&quot;khanvas&quot; width=&quot;800&quot; height=&quot;600&quot; style=&quot;outline: none;&quot;&gt;&lt;/canvas&gt;
-&lt;/p&gt;
-&lt;script src=&quot;/khaShmup/kha.js&quot;&gt;&lt;/script&gt;
 
 &lt;p&gt;We set out to learn how to make a basic game in
 &lt;a href=&quot;http://kha.ktxsoftware.com&quot;&gt;Kha&lt;/a&gt; and step-by-step we put together a
@@ -33,7 +29,16 @@ of the things that immediately come to mind:&lt;/p&gt;
 score-chasing or just playing through a specific sequence of
 enemies.&lt;/li&gt;
   &lt;li&gt;Allow enemies to shoot back at the player.&lt;/li&gt;
-  &lt;li&gt;Develop different kinds of enemies than the basic one we have.  &lt;/li&gt;
+  &lt;li&gt;Develop different kinds of enemies than the basic one we have.&lt;/li&gt;
+  &lt;li&gt;Improve performance - there are a few points such as
+Gun.getActives() and EnemySpawner.getActives() where we are
+generating a new array every frame - we could probably extend Hitbox
+to contain whether or not a given hitbox should generate collisions
+or not and remove this hit altogether. There are also a few points
+where we could cache values, short-circuit code, etc.&lt;/li&gt;
+  &lt;li&gt;Use a more robust collision system - for this game what we are doing
+works, but we may want to provide multiple collision callbacks, or
+even use something like &lt;a href=&quot;http://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374&quot;&gt;QuadTrees&lt;/a&gt;.&lt;/li&gt;
   &lt;li&gt;Design an AudioManager to handle sound, so if the user wants to
 adjust the volume or turn sound off, its easily adjustable in one
 place.&lt;/li&gt;

@@ -69,10 +69,6 @@
 </div>
 <div class="post-content">
   <h3 id="kha-shmup-tutorial-wrap-up">Kha Shmup Tutorial Wrap Up</h3>
-<p align="center">
-<canvas id="khanvas" width="800" height="600" style="outline: none;"></canvas>
-</p>
-<script src="/khaShmup/kha.js"></script>
 
 <p>We set out to learn how to make a basic game in
 <a href="http://kha.ktxsoftware.com">Kha</a> and step-by-step we put together a
@@ -90,7 +86,16 @@ of the things that immediately come to mind:</p>
 score-chasing or just playing through a specific sequence of
 enemies.</li>
   <li>Allow enemies to shoot back at the player.</li>
-  <li>Develop different kinds of enemies than the basic one we have.  </li>
+  <li>Develop different kinds of enemies than the basic one we have.</li>
+  <li>Improve performance - there are a few points such as
+Gun.getActives() and EnemySpawner.getActives() where we are
+generating a new array every frame - we could probably extend Hitbox
+to contain whether or not a given hitbox should generate collisions
+or not and remove this hit altogether. There are also a few points
+where we could cache values, short-circuit code, etc.</li>
+  <li>Use a more robust collision system - for this game what we are doing
+works, but we may want to provide multiple collision callbacks, or
+even use something like <a href="http://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374">QuadTrees</a>.</li>
   <li>Design an AudioManager to handle sound, so if the user wants to
 adjust the volume or turn sound off, its easily adjustable in one
 place.</li>
