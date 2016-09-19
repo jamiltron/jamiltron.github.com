@@ -124,11 +124,11 @@ tools it uses. You shouldn’t have to mess with this.</li>
 <p>Let’s open up khafile.js and get rid of everything and replace it with
 the following:</p>
 
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaShmup&#39;</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">let</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaSmup&#39;</span><span class="p">);</span>
 
 <span class="nx">project</span><span class="p">.</span><span class="nx">addSources</span><span class="p">(</span><span class="s1">&#39;Sources&#39;</span><span class="p">);</span>
 
-<span class="k">return</span> <span class="nx">project</span><span class="p">;</span></code></pre></div>
+<span class="nx">resolve</span><span class="p">(</span><span class="nx">project</span><span class="p">);</span></code></pre></div>
 
 <p>This defines a project named ‘KhaShmup’ and makes sure to tell the
 project to use the files found in the Sources directory. Let’s check
@@ -148,7 +148,7 @@ of this as we’ll be using a class for our own game.</p>
 <span class="kd">class</span> <span class="n">Main</span> <span class="p">{</span>
 
   <span class="kd">public</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="n">System</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="s2">&quot;KhaShmup&quot;</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="n">init</span><span class="p">);</span>
+    <span class="n">System</span><span class="p">.</span><span class="n">init</span><span class="p">({</span> <span class="n">title</span><span class="p">:</span> <span class="s2">&quot;KhaShmup&quot;</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="mi">600</span> <span class="p">},</span> <span class="n">init</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">function</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
@@ -301,7 +301,7 @@ in <a href="http://jamiltron.com/2015/12/KhaShmup-Tutorial-Part-2/">part 2</a>.<
           <h3 class="section-header">
             Older
             <span class="text-muted"> &middot; </span>
-            <a href="/archive">View Archive (22)</a>
+            <a href="/archive">View Archive (23)</a>
           </h3>
           <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Intro">Kha Shmup Tutorial Intro</a></h2>
           <p>Learning a new game framework by building a space shooter.</p>

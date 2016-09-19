@@ -111,12 +111,12 @@ we have to load the ship’s image asset.</p>
 <h4 id="assets-and-khafilejs">Assets and khafile.js</h4>
 <p>Go into the khafile.js project file and make sure it looks like this:</p>
 
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaShmup&#39;</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">let</span> <span class="nx">project</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Project</span><span class="p">(</span><span class="s1">&#39;KhaSmup&#39;</span><span class="p">);</span>
 
 <span class="nx">project</span><span class="p">.</span><span class="nx">addAssets</span><span class="p">(</span><span class="s1">&#39;Assets/**&#39;</span><span class="p">);</span>
 <span class="nx">project</span><span class="p">.</span><span class="nx">addSources</span><span class="p">(</span><span class="s1">&#39;Sources&#39;</span><span class="p">);</span>
 
-<span class="k">return</span> <span class="nx">project</span><span class="p">;</span></code></pre></div>
+<span class="nx">resolve</span><span class="p">(</span><span class="nx">project</span><span class="p">);</span></code></pre></div>
 
 <p>The only change is adding an assets directory. Now make sure to create
 this directory in the root of the project, and add an image to it name
@@ -284,7 +284,7 @@ will get the player moving around the screen.    </p>
           <h3 class="section-header">
             Older
             <span class="text-muted"> &middot; </span>
-            <a href="/archive">View Archive (22)</a>
+            <a href="/archive">View Archive (23)</a>
           </h3>
           <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-1">Kha Shmup Tutorial Part 1</a></h2>
           <p>Hello, purple window.</p>

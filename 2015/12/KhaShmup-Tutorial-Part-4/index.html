@@ -150,7 +150,7 @@ is what we will be using to manage these bullets:</p>
 
   <span class="kd">public</span> <span class="kd">function</span> <span class="nf">shoot</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Void</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">cooldownLeft</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-      <span class="n">Audio</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">bulletSound</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+      <span class="n">Audio</span><span class="p">.</span><span class="n">play</span><span class="p">(</span><span class="n">bulletSound</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
       <span class="n">cooldownLeft</span> <span class="o">=</span> <span class="n">shotInterval</span><span class="p">;</span>
       <span class="kd">var</span> adjX<span class="p">:</span> <span class="n">Int</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">Std</span><span class="p">.</span><span class="n">int</span><span class="p">(</span><span class="n">bulletImage</span><span class="p">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
 
@@ -193,8 +193,7 @@ feature - we have a shotInterval variable that defines how long in
 seconds we wait between two shots. When the user shoots, we check if
 the cooldownLeft is at zero, and if it is - we set it to the interval
 , create a bullet, and play a sound. The Audio.play method takes a
-sound, a boolean to specify if you want it to loop or not, and another
-boolean to specify if you want to stream the sound or not. This sound
+sound and a boolean to specify if you want it to loop or not. This sound
 is played by calling Audio.play, which is how we can interface with
 Kha’s audio1 api.</p>
 
@@ -517,7 +516,7 @@ we’ll be adding some targets for the player to shoot.</p>
           <h3 class="section-header">
             Older
             <span class="text-muted"> &middot; </span>
-            <a href="/archive">View Archive (22)</a>
+            <a href="/archive">View Archive (23)</a>
           </h3>
           <h2 class="post-title-link"><a href="/2015/12/KhaShmup-Tutorial-Part-3">Kha Shmup Tutorial Part 3</a></h2>
           <p>Move that ship!</p>
