@@ -5,9 +5,48 @@
     <description></description>
     <link>http://jamiltron.com</link>
     <atom:link href="http://jamiltron.comfeed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 20 Sep 2016 23:00:35 -0700</pubDate>
-    <lastBuildDate>Tue, 20 Sep 2016 23:00:35 -0700</lastBuildDate>
+    <pubDate>Mon, 20 Feb 2017 14:09:16 -0800</pubDate>
+    <lastBuildDate>Mon, 20 Feb 2017 14:09:16 -0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Norse Mythology</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/images/norse_mythology_cover.gif&quot; alt=&quot;Norse Mythology&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I finally got around to reading &lt;em&gt;Norse Mythology&lt;/em&gt; by Neil Gaiman, and loved it so
+much that I purchased the audiobook read by the author so I could hear it all again
+on my commute to work.&lt;/p&gt;
+
+&lt;p&gt;Gaiman starts with an introduction describing his background on Norse mythology,
+describing himself as a young boy reading the Marvel comics involving Thor, only
+to later discover Asgard was nothing like the high-tech superhero realm found
+within the comics.&lt;/p&gt;
+
+&lt;p&gt;Several stories are covered, some of them being the most common and well-loved
+stories such as Odin’s dealing with Mirmir, how the gods got a wall built around
+Asgard, the origin of the Mead of Poetry, and of course the death of Baldur,
+the imprisonment of Loki, and Ragnarök itself.&lt;/p&gt;
+
+&lt;p&gt;Even as someone who has read versions of these myths before I was very happy with
+Gaiman’s interpretations, keeping a very wry and humorous disposition when
+addressing the myths. His way of telling the stories is what compelled me to
+purchase the audiobook for a second-go-through of the material, and hearing his
+delivery is well worth it.&lt;/p&gt;
+
+&lt;p&gt;Overall I highly recommend this book, even if you have experience with Norse
+mythology, I still feel this is a unique and worthwhile presentation, and if you
+aren’t familiar - I feel this is a great book to introduce you to the Norse myths.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 20 Feb 2017 00:00:00 -0800</pubDate>
+        <link>http://jamiltron.com/2017/02/Norse-Mythology</link>
+        <guid isPermaLink="true">http://jamiltron.com/2017/02/Norse-Mythology</guid>
+        
+        
+        <category>mythology</category>
+        
+        <category>book-reviews</category>
+        
+      </item>
     
       <item>
         <title>Roguelike Celebration 2016</title>
@@ -3446,9 +3485,7 @@ a physical copy of - &lt;a href=&quot;http://gameprogrammingpatterns.com/&quot;&
         
         <category>game-dev</category>
         
-        <category>books</category>
-        
-        <category>reviews</category>
+        <category>books-reviews</category>
         
       </item>
     
